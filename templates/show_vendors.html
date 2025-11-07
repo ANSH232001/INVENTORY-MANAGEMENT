@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vendors</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: auto; padding: 30px; background: #f7f7f7; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #7b5fff; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    a.button {
+      display: inline-block; padding: 10px 20px; background: #7b5fff; color: white;
+      text-decoration: none; border-radius: 6px; margin-top: 20px;
+      font-weight: 600;
+    }
+    a.button:hover { background: #925cff; }
+    a.button {
+    display: block;
+    width: 220px;
+    margin: 2rem auto 0;
+    padding: 14px 0;
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 30px;
+    box-shadow: 0 7px 20px rgba(0,123,255,0.4);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  a.button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 10px 30px rgba(0,86,179,0.6);
+  }
+  .button-link {
+    background-color: #7b5fff;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+  .button-link:hover {
+    background-color: #925cff;
+  }
+  </style>
+</head>
+<body>
+  <h2>Vendor List</h2>
+  <a href="{{ url_for('add_vendor') }}" class="button">Add New Vendor</a>
+  <table>
+    <thead>
+      <tr>
+        <th>Vendor Code</th>
+        <th>Company Name</th>
+        <th>Contact</th>
+        <th>Address</th>
+        <th>GSTIN</th>
+        <th>Material Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for vendor in vendors %}
+      <tr>
+        <td>{{ vendor.vendor_code }}</td>
+        <td>{{ vendor.company_name }}</td>
+        <td>{{ vendor.contact }}</td>
+        <td>{{ vendor.address }}</td>
+        <td>{{ vendor.gstin }}</td>
+        <td>{{ vendor.material_type }}</td>
+      <td>
+        <form action="{{ url_for('delete_vendor', id=vendor.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this vendor?');">
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+        </form>
+      </td>
+
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center;">No vendors found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+ <a href="{{ url_for('dashboard') }}" class="button" role="button">Back to Dashboard</a>
+</body>
+</html>

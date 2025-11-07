@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generate Invoice</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 2rem;
+      background-color: #f8f9fa;
+    }
+    h2 {
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    table th, table td {
+      vertical-align: middle !important;
+    }
+    .form-control[readonly] {
+      background-color: #e9ecef;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Generate Invoice</h2>
+    <form method="POST" action="{{ url_for('generate_invoice') }}">
+      <!-- Customer Details -->
+      <div class="mb-4">
+        <h5>Customer Details</h5>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="customer_name" class="form-label">Customer Name <span class="text-danger">*</span></label>
+            <input type="text" id="customer_name" name="customer_name" class="form-control" required />
+          </div>
+          <div class="col-md-4">
+            <label for="customer_gstin" class="form-label">Customer GSTIN</label>
+            <input type="text" id="customer_gstin" name="customer_gstin" class="form-control" />
+          </div>
+          <div class="col-md-4">
+            <label for="customer_address" class="form-label">Customer Address</label>
+            <input type="text" id="customer_address" name="customer_address" class="form-control" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Products Table -->
+      <div class="mb-4">
+        <h5>Select Products</h5>
+        <table class="table table-bordered text-center" id="products-table">
+          <thead class="table-primary">
+            <tr>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Rate (per unit)</th>
+              <th>GST %</th>
+              <th>Total</th>
+              <th>Select</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in products %}
+            <tr>
+              <td>{{ product.name }}</td>
+              <td>
+                <input
+                  type="number"
+                  min="0"
+                  name="quantity"
+                  class="form-control quantity-input"
+                  data-price="{{ product.capacity or 0 }}"
+                  data-gst="18"
+                  value="0"
+                  disabled
+                />
+              </td>
+              <td>{{ "%.2f"|format(product.capacity|float(0)) }}</td>
+              <td>18%</td>
+              <td class="line-total">0.00</td>
+              <td>
+                <input type="checkbox" class="product-checkbox" />
+                <input type="hidden" name="product" value="{{ product.name }}" />
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Totals and GST -->
+      <div class="mb-4 row g-3 justify-content-end">
+        <div class="col-md-3">
+          <label class="form-label">Subtotal</label>
+          <input type="text" class="form-control" id="subtotal" name="subtotal" readonly value="0.00" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">CGST (9%)</label>
+          <input type="text" class="form-control" id="cgst" name="cgst" readonly value="0.00" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">SGST (9%)</label>
+          <input type="text" class="form-control" id="sgst" name="sgst" readonly value="0.00" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Grand Total</label>
+          <input type="text" class="form-control" id="grand_total" name="grand_total" readonly value="0.00" />
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary btn-lg">Generate Invoice</button>
+      </div>
+    </form>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const quantityInputs = document.querySelectorAll('.quantity-input');
+      const productCheckboxes = document.querySelectorAll('.product-checkbox');
+
+      productCheckboxes.forEach((checkbox, idx) => {
+        checkbox.addEventListener('change', function () {
+          quantityInputs[idx].disabled = !this.checked;
+          if (!this.checked) {
+            quantityInputs[idx].value = 0;
+            updateTotals();
+          }
+        });
+      });
+
+      quantityInputs.forEach(input => {
+        input.addEventListener('input', updateTotals);
+      });
+
+      function updateTotals() {
+        let subtotal = 0;
+        const rows = document.querySelectorAll('#products-table tbody tr');
+
+        rows.forEach(row => {
+          const checkbox = row.querySelector('.product-checkbox');
+          const qtyInput = row.querySelector('.quantity-input');
+          const lineTotalElem = row.querySelector('.line-total');
+          if (checkbox.checked) {
+            const qty = parseFloat(qtyInput.value) || 0;
+            const price = parseFloat(qtyInput.dataset.price);
+            const gst = parseFloat(qtyInput.dataset.gst);
+            const taxable = qty * price;
+            const gstAmount = taxable * gst / 100;
+            const total = taxable + gstAmount;
+            lineTotalElem.textContent = total.toFixed(2);
+            subtotal += taxable;
+          } else {
+            lineTotalElem.textContent = "0.00";
+          }
+        });
+
+        const cgst = subtotal * 0.09;
+        const sgst = subtotal * 0.09;
+        const grandTotal = subtotal + cgst + sgst;
+
+        document.getElementById('subtotal').value = subtotal.toFixed(2);
+        document.getElementById('cgst').value = cgst.toFixed(2);
+        document.getElementById('sgst').value = sgst.toFixed(2);
+        document.getElementById('grand_total').value = grandTotal.toFixed(2);
+      }
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

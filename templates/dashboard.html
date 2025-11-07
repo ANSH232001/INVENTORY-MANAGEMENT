@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Inventory Management Dashboard</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg-color: #121417;
+    --card-bg: rgba(255, 255, 255, 0.1);
+    --accent-color: #0ff;
+    --accent-hover: #0cc;
+    --text-color: #e0e6f1;
+    --shadow-color: rgba(0, 255, 255, 0.2);
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  a:hover {
+    color: var(--accent-hover);
+  }
+
+  /* Top Navbar with brand and hamburger */
+  nav.navbar-top {
+    background: rgba(18, 20, 23, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 2px 12px var(--shadow-color);
+    height: 56px;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    position: fixed;
+    width: 100%;
+    z-index: 1100;
+  }
+  .navbar-top .btn-hamburger {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 1rem;
+    display: none;
+  }
+  .navbar-top .brand-title {
+    color: var(--accent-color);
+    font-weight: 700;
+    font-size: 1.5rem;
+    user-select: none;
+  }
+
+  /* Logout button fixed top-right */
+  #logoutBtnFixed {
+    position: fixed;
+    top: 12px;
+    right: 20px;
+    background: none;
+    border: 2px solid var(--accent-color);
+    color: var(--accent-color);
+    padding: 0.35rem 0.9rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    z-index: 1200;
+    text-decoration: none;
+  }
+  #logoutBtnFixed:hover {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    box-shadow: 0 0 24px 5px var(--accent-color);
+  }
+
+  /* Sidebar */
+  #sidebar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    width: 260px;
+    height: calc(100vh - 56px);
+    background: rgba(18, 20, 23, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 2px 0 12px var(--shadow-color);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+    z-index: 1099;
+  }
+  #sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+  #sidebar h2 {
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 3rem;
+    color: var(--accent-color);
+    letter-spacing: 0.1em;
+    user-select: none;
+  }
+  #sidebar nav a {
+    padding: 0.9rem 1rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 500;
+    font-size: 1.1rem;
+    color: var(--text-color);
+    margin-bottom: 1.1rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  #sidebar nav a:hover, #sidebar nav a.active {
+    background-color: var(--accent-color);
+    color: #121417;
+    box-shadow: 0 0 12px 2px var(--accent-color);
+  }
+  #sidebar nav a i {
+    font-size: 1.3rem;
+  }
+
+  #main-content {
+    margin-left: 260px;
+    padding: 3rem 3rem 4rem;
+    transition: margin-left 0.3s ease;
+  }
+  #main-content.expanded {
+    margin-left: 0;
+  }
+
+  h1.dashboard-title {
+    font-weight: 700;
+    font-size: 2.8rem;
+    margin-bottom: 2.8rem;
+    letter-spacing: 0.04em;
+  }
+
+  .section-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 2rem;
+    margin-bottom: 3rem;
+    color: var(--text-color);
+  }
+
+  .section-title {
+    font-weight: 700;
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 3px solid var(--accent-color);
+    padding-bottom: 0.3rem;
+  }
+
+  .button-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.3rem;
+    justify-content: flex-start;
+  }
+
+  .btn-glass {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1.8px solid rgba(255, 255, 255, 0.3);
+    border-radius: 14px;
+    padding: 0.85rem 1.8rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-color);
+    cursor: pointer;
+    box-shadow: 0 4px 30px rgba(0, 255, 255, 0.12);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    min-width: 190px;
+    user-select: none;
+    transition: background-color 0.25s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .btn-glass i {
+    font-size: 1.3rem;
+  }
+  .btn-glass:hover, .btn-glass:focus {
+    background: var(--accent-color);
+    color: var(--bg-color);
+    box-shadow: 0 6px 25px var(--accent-color);
+    outline: none;
+    transform: translateY(-4px);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2rem;
+  }
+  .stat-card {
+    background: rgba(255, 255, 255, 0.12);
+    padding: 1.5rem;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 1.2rem;
+    text-align: center;
+    color: var(--text-color);
+    box-shadow: 0 4px 20px rgba(0, 255, 255, 0.12);
+    transition: box-shadow 0.3s ease;
+    user-select: none;
+  }
+  .stat-card i {
+    font-size: 2.8rem;
+    margin-bottom: 0.4rem;
+    display: block;
+    color: var(--accent-color);
+  }
+  .stat-card:hover {
+    box-shadow: 0 6px 35px var(--accent-color);
+  }
+
+  @media (max-width: 992px) {
+    #sidebar {
+      transform: translateX(-100%);
+      height: 100vh;
+      top: 0;
+      padding-top: 4rem;
+    }
+    #sidebar.expanded {
+      transform: translateX(0);
+    }
+    #main-content {
+      margin-left: 0;
+      padding: 4rem 1.5rem 3rem;
+    }
+    nav.navbar-top .btn-hamburger {
+      display: block;
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar-top" role="banner">
+  <button class="btn-hamburger" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar" id="sidebarToggle">
+    <i class="bi bi-list"></i>
+  </button>
+  <div class="brand-title" tabindex="0">Dashboard</div>
+</nav>
+
+<a href="{{ url_for('logout') }}" id="logoutBtnFixed" aria-label="Logout">
+  Logout <i class="bi bi-box-arrow-right"></i>
+</a>
+
+<aside id="sidebar" role="complementary" aria-label="Sidebar Navigation">
+  <h2 tabindex="0">Inventory</h2>
+  <nav role="navigation" aria-label="Primary">
+    <a href="/dashboard" class="active" aria-current="page"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="/add_material"><i class="bi bi-plus-circle"></i> Add Material</a>
+    <a href="/add_finished_product"><i class="bi bi-box-seam"></i> Add Finished Product</a>
+    <a href="/search"><i class="bi bi-search"></i> Search</a>
+    <a href="/show_materials"><i class="bi bi-folder2-open"></i> Materials</a>
+    <a href="/show_finished_goods"><i class="bi bi-archive"></i> Finished Goods</a>
+    <a href="/history"><i class="bi bi-clock-history"></i> History</a>
+    <a href="{{ url_for('add_vendor') }}"><i class="bi bi-person-plus"></i> Add Vendor</a>
+    <a href="{{ url_for('show_vendors') }}"><i class="bi bi-people"></i> Vendors</a>
+    <a href="{{ url_for('generate_invoice') }}"><i class="bi bi-receipt"></i> Generate Invoice</a>
+    <a href="/invoice_history"><i class="bi bi-card-list"></i> Invoices</a>
+      <a href="{{ url_for('add_purchase_order') }}"><i class="bi bi-file-earmark-plus"></i> Add Purchase Order</a>
+
+  </nav>
+</aside>
+
+<main id="main-content" role="main">
+  <h1 class="dashboard-title" tabindex="0">Sanaka Lithium</h1>
+
+  <section class="section-card" aria-label="Inventory Management">
+    <h2 class="section-title" tabindex="0">Inventory Management</h2>
+    <div class="button-container">
+      <button onclick="window.location.href='/add_material'" class="btn-glass"><i class="bi bi-plus-circle"></i> Add Material</button>
+      <button onclick="window.location.href='/add_finished_product'" class="btn-glass"><i class="bi bi-box-seam"></i> Add Finished Product</button>
+      <button onclick="window.location.href='/search'" class="btn-glass"><i class="bi bi-search"></i> Search Material/Product</button>
+      <button onclick="window.location.href='/show_materials'" class="btn-glass"><i class="bi bi-folder2-open"></i> Show Materials</button>
+      <button onclick="window.location.href='/show_finished_goods'" class="btn-glass"><i class="bi bi-archive"></i> Show Finished Goods</button>
+      <button onclick="window.location.href='/history'" class="btn-glass"><i class="bi bi-clock-history"></i> History</button>
+        <button  onclick="window.location.href='/add_purchase_order'" class="btn-glass"><i class="bi bi-plus-circle"></i>Add Purchased Item </button>
+    </div>
+  </section>
+
+  <section class="section-card" aria-label="Vendor Management">
+    <h2 class="section-title" tabindex="0">Vendor Management</h2>
+    <div class="button-container">
+      <button onclick="window.location.href='{{ url_for('add_vendor') }}'" class="btn-glass"><i class="bi bi-person-plus"></i> Add Vendor</button>
+      <button onclick="window.location.href='{{ url_for('show_vendors') }}'" class="btn-glass"><i class="bi bi-people"></i> Show Vendors</button>
+    </div>
+  </section>
+
+  <section class="section-card" aria-label="Invoicing and Billing">
+    <h2 class="section-title" tabindex="0">Invoicing & Billing</h2>
+    <div class="button-container">
+      <button onclick="window.location.href='{{ url_for('generate_invoice') }}'" class="btn-glass"><i class="bi bi-receipt"></i> Generate Invoice</button>
+      <button onclick="window.location.href='/invoice_history'" class="btn-glass"><i class="bi bi-card-list"></i> All Invoices</button>
+    </div>
+  </section>
+
+  <section class="section-card" aria-label="Data Management">
+    <h2 class="section-title" tabindex="0">Data Management</h2>
+    <div class="button-container">
+      <div class="dropdown d-inline-block">
+        <button class="btn-glass dropdown-toggle" type="button" id="exportBtn" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-file-earmark-arrow-down"></i> Export Data
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="exportBtn">
+          <li><a class="dropdown-item" href="{{ url_for('export_data', table_name='materials') }}">Export Materials</a></li>
+          <li><a class="dropdown-item" href="{{ url_for('export_data', table_name='finished_products') }}">Export Finished Goods</a></li>
+          <li><a class="dropdown-item" href="{{ url_for('export_data', table_name='vendors') }}">Export Vendors</a></li>
+        </ul>
+      </div>
+
+      <div class="dropdown d-inline-block ms-3">
+        <button class="btn-glass dropdown-toggle" type="button" id="importBtn" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-file-earmark-arrow-up"></i> Import Data
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="importBtn">
+          <li><a class="dropdown-item" href="{{ url_for('import_data', table_name='materials') }}">Import Materials</a></li>
+          <li><a class="dropdown-item" href="{{ url_for('import_data', table_name='finished_products') }}">Import Finished Goods</a></li>
+          <li><a class="dropdown-item" href="{{ url_for('import_data', table_name='vendors') }}">Import Vendors</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Quick Stats" tabindex="0" style="margin-bottom:4rem;">
+    <h2 class="section-title">Quick Stats</h2>
+    <div class="stats-grid" role="list">
+      <div class="stat-card" role="listitem" aria-label="Total Materials">
+        <i class="bi bi-cube-stack"></i><br />
+        Total Materials: {{ material_count }}
+      </div>
+      <div class="stat-card" role="listitem" aria-label="Total Finished Products">
+        <i class="bi bi-box"></i><br />
+        Total Finished Products: {{ finished_product_count }}
+      </div>
+      <div class="stat-card" role="listitem" aria-label="Total Vendors">
+        <i class="bi bi-people-fill"></i><br />
+        Total Vendors: {{ vendor_count }}
+      </div>
+      <div class="stat-card" role="listitem" aria-label="Total Invoices">
+        <i class="bi bi-receipt-cutoff"></i><br />
+        Total Invoices: {{ invoice_count }}
+      </div>
+      <div class="stat-card" role="listitem" aria-label="Total Purchase Orders">
+        <i class="bi bi-file-earmark-text"></i><br />
+        Total Purchase Orders: {{ purchase_order_count }}
+      </div>
+    </div>
+  </section>
+
+  <section class="section-card" aria-label="Recent Purchase Orders">
+    <h2 class="section-title" tabindex="0">Recent Purchase Orders</h2>
+    <table class="table table-dark table-striped table-hover" style="color: var(--text-color);">
+      <thead>
+        <tr>
+          <th>PO Number</th>
+          <th>GRN Number</th>
+          <th>Invoice Number</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for po in recent_purchase_orders %}
+        <tr>
+          <td>{{ po.purchase_order_number }}</td>
+          <td>{{ po.grn_number }}</td>
+          <td>{{ po.invoice_number }}</td>
+          <td>{{ po.date.strftime('%Y-%m-%d') }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" class="text-center">No purchase orders found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const mainContent = document.getElementById('main-content');
+  const toggleBtn = document.getElementById('sidebarToggle');
+
+  toggleBtn.addEventListener('click', () => {
+    const expanded = toggleBtn.getAttribute('aria-expanded') === 'true' || false;
+    toggleBtn.setAttribute('aria-expanded', !expanded);
+    sidebar.classList.toggle('expanded');
+    mainContent.classList.toggle('expanded');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth > 992) return;
+    if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+      sidebar.classList.remove('expanded');
+      mainContent.classList.remove('expanded');
+      toggleBtn.setAttribute('aria-expanded', false);
+    }
+  });
+</script>
+</body>
+</html>

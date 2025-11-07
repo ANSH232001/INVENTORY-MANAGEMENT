@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Add Purchase Order</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+  <style>
+    .panel-box {
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 20px 30px 30px 30px;
+      box-shadow: 0 0 5px rgb(0 0 0 / 0.1);
+      background-color: #fff;
+      max-width: 900px;
+      margin: 30px auto;
+    }
+    label { font-weight: 600; }
+    input.form-control, select.form-select { max-width: 300px !important; }
+    select.select2-select-material { max-width: 220px !important; margin-bottom: 6px; }
+    input.form-control[name="quantity"], input.form-control[name="rate"] {
+      max-width: 100px !important;
+    }
+    input.form-control[name="total"] {
+      max-width: 120px !important;
+      background-color: #e9ecef;
+    }
+    .add-product-btn {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 5px 12px;
+      border: 1.5px solid #7b5fff;
+      color: #7b5fff;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.9rem;
+      background-color: transparent;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .add-product-btn:hover { background-color: #7b5fff; color: white; }
+    .remove-product {
+      font-size: 1.4rem;
+      color: #dc3545;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex; justify-content: center; align-items: center;
+      padding: 0; width: 36px; height: 36px;
+      transition: color 0.3s ease;
+    }
+    .remove-product:hover { color: #b02a37; }
+    td { vertical-align: middle !important; padding-top: 0.65rem !important; padding-bottom: 0.65rem !important; }
+  </style>
+</head>
+<body>
+  <div class="panel-box" role="main">
+    <h2 class="mb-4">Add Purchase Order</h2>
+    <form method="POST" action="{{ url_for('purchase_order') }}">
+      <div class="mb-3">
+        <label for="purchase_order_number" class="form-label">Purchase Order Number:</label>
+        <input type="text" id="purchase_order_number" name="purchase_order_number" class="form-control" required placeholder="Enter Purchase Order Number" />
+      </div>
+
+      <div class="mb-1 d-flex align-items-center" style="gap: 1rem; max-width: 1000px;">
+        <div class="mb-3" style="max-width: 300px">
+          <label for="grn_number" class="form-label">GRN Number:</label>
+          <input type="text" class="form-control" id="grn_number" name="grn_number" value="{{ generated_grn }}" readonly />
+        </div>
+        <div style="text-align: right; margin: 1rem 2rem 1rem auto; font-weight: bold; font-size: 1rem; display: inline-block;">
+          <span style="background: whitesmoke; color: black; padding: 4px 10px; border-radius: 12px; font-size: 0.9rem;">
+            GRN Date: {{ today_date }}
+          </span>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="invoice_number" class="form-label">Invoice Number:</label>
+        <input type="text" id="invoice_number" name="invoice_number" class="form-control" required placeholder="Enter Invoice Number" />
+      </div>
+
+      <div class="mb-3">
+        <table class="table table-bordered mb-0" id="products-table" aria-label="Products table">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 20%;">Product</th>
+              <th style="width: 10%;">Material Code</th>
+              <th style="width: 15%;">Vendor</th>
+              <th style="width: 10%;">Uom</th>
+              <th style="width: 10%;">Current Stock</th>
+              <th style="width: 10%;">Quantity</th>
+              <th style="width: 10%;">Rate</th>
+              <th style="width: 10%;">Total</th>
+              <th style="width: 10%;"></th>
+            </tr>
+          </thead>
+          <tbody id="products-container"></tbody>
+        </table>
+        <div class="add-product-btn" id="add-product-btn" tabindex="0" role="button" aria-label="Add a product">Add a product</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary mt-4" style="max-width: 300px;">Add Purchase Order</button>
+    </form>
+  </div>
+
+  <!-- Bootstrap, jQuery, Select2 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <script>
+    const productDataMap = {
+      {% for material in materials %}
+      "{{ material.id }}": {
+        material_code: {{ material.material_code|tojson }},
+        vendor: {{ material.vendor|tojson }},
+        uom: {{ material.unit_of_measurement|tojson }},
+        current_stock: {{ material.current_stock }},
+        rate: {{ material.rate if material.rate is defined else 0 }}
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    };
+
+    const container = document.getElementById('products-container');
+
+    function calculateTotal(row) {
+      const qtyInput = row.querySelector('input[name="quantity"]');
+      const rateInput = row.querySelector('input[name="rate"]');
+      const totalInput = row.querySelector('input[name="total"]');
+
+      const qty = parseFloat(qtyInput.value) || 0;
+      const rate = parseFloat(rateInput.value) || 0;
+
+      totalInput.value = (qty * rate).toFixed(2);
+    }
+
+    function addProductRow() {
+      const tr = document.createElement('tr');
+      tr.classList.add('product-row', 'align-middle');
+
+      let optionsHTML = '<option></option>';
+      {% for material in materials %}
+      optionsHTML += `<option value="{{ material.id }}">{{ material.material_name }}</option>`;
+      {% endfor %}
+
+      tr.innerHTML = `
+        <td>
+          <select class="select2-select-material" name="material_id" style="width: 100%;" required>
+            ${optionsHTML}
+          </select>
+        </td>
+        <td><input type="text" name="material_code" class="form-control" readonly /></td>
+        <td><input type="text" name="vendor" class="form-control" readonly /></td>
+        <td><input type="text" name="uom" class="form-control" readonly /></td>
+        <td><input type="number" name="current_stock" class="form-control" readonly /></td>
+        <td><input type="number" name="quantity" class="form-control" min="1" required value="0" /></td>
+        <td><input type="number" name="rate" class="form-control" min="0" step="0.01" required value="0" /></td>
+        <td><input type="text" name="total" class="form-control" readonly value="0.00" /></td>
+        <td class="text-center">
+          <button type="button" class="remove-product" title="Remove product">
+            <i class="bi bi-trash-fill"></i>
+          </button>
+        </td>
+      `;
+
+      container.appendChild(tr);
+
+      const select = $(tr).find('.select2-select-material');
+      select.select2({
+        placeholder: 'Search product',
+        allowClear: true,
+        width: 'resolve'
+      });
+
+      select.on('change', function() {
+        const val = this.value;
+        const data = productDataMap[val] || {material_code: '', vendor: '', uom: '', current_stock: '', rate: 0};
+        const row = this.closest('tr');
+        row.querySelector('input[name="material_code"]').value = data.material_code;
+        row.querySelector('input[name="vendor"]').value = data.vendor;
+        row.querySelector('input[name="uom"]').value = data.uom;
+        row.querySelector('input[name="current_stock"]').value = data.current_stock;
+        row.querySelector('input[name="rate"]').value = data.rate.toFixed(2);
+        calculateTotal(row);
+      });
+
+      // Calculate total when quantity or rate changes
+      tr.querySelector('input[name="quantity"]').addEventListener('input', e => calculateTotal(tr));
+      tr.querySelector('input[name="rate"]').addEventListener('input', e => calculateTotal(tr));
+
+      tr.querySelector('.remove-product').addEventListener('click', function() {
+        select.select2('destroy');
+        container.removeChild(tr);
+      });
+    }
+
+    document.getElementById('add-product-btn').addEventListener('click', addProductRow);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      addProductRow();
+    });
+  </script>
+</body>
+</html>

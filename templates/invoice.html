@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invoice {{ invoice.invoice_number }}</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 2rem; }
+  h1, h2, h3, h4, h5 { margin: 0; }
+  table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+  th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+  .total-row td { font-weight: bold; }
+  .no-print { margin: 1em 0; }
+  @media print {
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<h2>Invoice #{{ invoice.invoice_number }}</h2>
+<p><strong>Date:</strong> {{ invoice.date.strftime('%d-%m-%Y') }}</p>
+
+<div style="display: flex; align-items: center; margin-bottom: 1rem;">
+  <img src="{{ url_for('static', filename='logo.png') }}" alt="Company Logo" style="height: 80px; margin-right: 20px;">
+</div>
+
+<h3>Customer Details</h3>
+<p>
+  <strong>Name:</strong> {{ invoice.customer_name }}<br />
+  <strong>GSTIN:</strong> {{ invoice.customer_gstin or 'N/A' }}<br />
+  <strong>Address:</strong> {{ invoice.customer_address or 'N/A' }}
+</p>
+
+<h3>Items</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Product</th>
+      <th>Quantity</th>
+      <th>Rate</th>
+      <th>GST Rate (%)</th>
+      <th>Line Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in invoice.items %}
+    <tr>
+      <td>{{ item.product_name }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>{{ "%.2f"|format(item.rate) }}</td>
+      <td>{{ "%.2f"|format(item.gst_rate) }}</td>
+      <td>{{ "%.2f"|format(item.line_total) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr class="total-row">
+      <td colspan="4">Subtotal</td>
+      <td>{{ "%.2f"|format(invoice.subtotal) }}</td>
+    </tr>
+    <tr class="total-row">
+      <td colspan="4">CGST</td>
+      <td>{{ "%.2f"|format(invoice.cgst) }}</td>
+    </tr>
+    <tr class="total-row">
+      <td colspan="4">SGST</td>
+      <td>{{ "%.2f"|format(invoice.sgst) }}</td>
+    </tr>
+    <tr class="total-row">
+      <td colspan="4">Grand Total</td>
+      <td>{{ "%.2f"|format(invoice.total) }}</td>
+    </tr>
+  </tfoot>
+</table>
+
+<div class="no-print">
+  <button onclick="window.print()">Print Invoice</button>
+  <button onclick="window.history.back()">Back</button>
+</div>
+
+</body>
+</html>

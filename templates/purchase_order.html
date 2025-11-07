@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Purchase Order</title>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        #po_details { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h2>Create Purchase Order</h2>
+    <form id="po_form" method="POST" action="{{ url_for('purchase_order') }}">
+        <label for="purchase_order_number">Purchase Order Number:</label>
+        <input type="text" id="purchase_order_number" name="purchase_order_number" required>
+        <button type="button" id="generate_grn_btn">Generate GRN</button>
+
+        <div id="po_details" style="display:none;">
+            <p><strong>GRN Number:</strong> <span id="grn_display"></span></p>
+            <input type="hidden" id="grn_number" name="grn_number">
+
+            <label for="invoice_number">Invoice Number:</label>
+            <input type="text" id="invoice_number" name="invoice_number" required><br><br>
+
+            <label for="material_search">Search Material:</label>
+            <select id="material_search" name="material_id" style="width:300px;" required></select><br><br>
+
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" min="1" value="1" required><br><br>
+
+            <button type="submit">Submit Purchase Order</button>
+        </div>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#generate_grn_btn').click(function() {
+                var po_number = $('#purchase_order_number').val().trim();
+                if (!po_number) {
+                    alert('Please enter Purchase Order Number');
+                    return;
+                }
+                $.ajax({
+                    url: '{{ url_for("generate_grn") }}',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({purchase_order_number: po_number}),
+                    success: function(response) {
+                        $('#grn_display').text(response.grn_number);
+                        $('#grn_number').val(response.grn_number);
+                        $('#po_details').show();
+                        $('#generate_grn_btn').hide();
+                        $('#purchase_order_number').prop('readonly', true);
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseJSON.error || 'Error generating GRN');
+                    }
+                });
+            });
+
+            $('#material_search').select2({
+                placeholder: 'Search for material',
+                ajax: {
+                    url: '{{ url_for("search_materials") }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            q: params.term
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 1
+            });
+        });
+    </script>
+</body>
+</html>

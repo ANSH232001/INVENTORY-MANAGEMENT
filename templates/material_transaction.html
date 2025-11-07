@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Material Transactions</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 30px; max-width: 600px; margin: auto; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    select, input, textarea { width: 100%; padding: 8px; margin-top: 6px; box-sizing: border-box; }
+    button { margin-top: 20px; padding: 12px; background: #007bff; color: white; border: none; width: 100%; cursor: pointer; border-radius: 6px; font-weight: bold; }
+    button:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <h2>Add Material Transaction</h2>
+  <form method="post">
+    <label for="material_id">Select Material</label>
+    <select name="material_id" id="material_id" required>
+      <option value="">-- Select Material --</option>
+      {% for material in materials %}
+        <option value="{{ material.id }}">{{ material.material_code }} - {{ material.material_name }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="transaction_type">Transaction Type</label>
+    <select name="transaction_type" id="transaction_type" required>
+      <option value="">-- Select Transaction Type --</option>
+      <optgroup label="Material In">
+        <option value="purchase">Purchase</option>
+        <option value="return">Return</option>
+      </optgroup>
+      <optgroup label="Material Out">
+        <option value="production">Production</option>
+        <option value="service">Service</option>
+        <option value="rnd">R&D</option>
+        <option value="other">Other</option>
+      </optgroup>
+    </select>
+
+    <label for="quantity">Quantity</label>
+    <input type="number" name="quantity" id="quantity" min="1" required>
+
+    <label for="transaction_date">Transaction Date</label>
+    <input type="date" name="transaction_date" id="transaction_date" value="{{ datetime.utcnow().date() }}" required>
+
+    <label for="remarks">Remarks (Optional)</label>
+    <textarea name="remarks" id="remarks" rows="3"></textarea>
+
+    <button type="submit">Add Transaction</button>
+  </form>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Update Finished Product Stock</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 400px; margin: auto; }
+    label, input, button { display: block; width: 100%; margin-top: 12px; }
+    button {
+      background-color: #7b5fff; color: white; padding: 12px; border: none; border-radius: 8px;
+      font-weight: 600; cursor: pointer;
+    }
+    button:hover { background-color: #925cff; }
+  </style>
+</head>
+<body>
+  <h2>Update Stock for: {{ product.name }}</h2>
+  <form method="post">
+    <label>Current Stock</label>
+    <input type="number" name="current_stock" value="{{ product.current_stock or 0 }}" min="0" required />
+    <button type="submit">Save</button>
+  </form>
+  <a href="{{ url_for('show_finished_goods') }}">Back to Finished Goods</a>
+</body>
+</html>

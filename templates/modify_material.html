@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Modify Material {{ material.material_code }}</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .container {
+    background-color: #fff;
+    padding: 30px 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    width: 400px;
+    max-width: 90vw;
+  }
+  h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
+  }
+  form label {
+    display: block;
+    margin: 12px 0 6px 0;
+    font-weight: 600;
+    color: #555;
+  }
+  form input[type="text"],
+  form input[type="number"],
+  form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.8px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+  }
+  form input[type="text"]:focus,
+  form input[type="number"]:focus,
+  form textarea:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  form textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  .button-group {
+    margin-top: 25px;
+    display: flex;
+    justify-content: space-between;
+  }
+  button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    font-weight: 700;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    flex-grow: 1;
+    margin-right: 15px;
+    transition: background-color 0.3s ease;
+  }
+  button[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+  .cancel-link {
+    flex-grow: 1;
+    text-align: center;
+    line-height: 38px;
+    font-weight: 600;
+    color: #6c757d;
+    text-decoration: none;
+    padding: 12px 20px;
+    border: 1.8px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.3s ease, color 0.3s ease;
+  }
+  .cancel-link:hover {
+    border-color: #007bff;
+    color: #007bff;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h2>Modify Material - {{ material.material_code }}</h2>
+    <form method="POST">
+      <label for="material_name">Material Name</label>
+      <input type="text" id="material_name" name="material_name" value="{{ material.material_name }}" required />
+
+      <label for="vendor">Vendor</label>
+      <input type="text" id="vendor" name="vendor" value="{{ material.vendor }}" />
+
+      <label for="item_category">Category</label>
+      <input type="text" id="item_category" name="item_category" value="{{ material.item_category }}" />
+
+      <label for="unit_of_measurement">Unit</label>
+      <input type="text" id="unit_of_measurement" name="unit_of_measurement" value="{{ material.unit_of_measurement }}" />
+
+      <label for="minimum_stock_level">Min Stock</label>
+      <input type="number" id="minimum_stock_level" name="minimum_stock_level" value="{{ material.minimum_stock_level }}" min="0" />
+
+      <label for="yellow_alert">Yellow Alert</label>
+      <input type="number" id="yellow_alert" name="yellow_alert" value="{{ material.yellow_alert if material.yellow_alert is defined else '' }}" min="0" placeholder="Enter yellow alert threshold" />
+
+      <label for="red_alert">Red Alert</label>
+      <input type="number" id="red_alert" name="red_alert" value="{{ material.red_alert if material.red_alert is defined else '' }}" min="0" placeholder="Enter red alert threshold" />
+
+      <label for="current_stock">Current Stock</label>
+      <input type="number" id="current_stock" name="current_stock" value="{{ material.current_stock }}" min="0" />
+
+      <label for="reorder_quantity">Reorder Qty</label>
+      <input type="number" id="reorder_quantity" name="reorder_quantity" value="{{ material.reorder_quantity }}" min="0" />
+
+      <label for="purchase_history">Purchase History</label>
+      <textarea id="purchase_history" name="purchase_history">{{ material.purchase_history }}</textarea>
+
+
+      <div class="button-group">
+        <button type="submit">Modify</button>
+        <a href="{{ url_for('show_materials') }}" class="cancel-link">Cancel</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

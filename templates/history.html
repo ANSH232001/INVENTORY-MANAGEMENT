@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Transaction History</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9fafb; /* light neutral background */
+    color: #343a40; /* dark text for contrast */
+    margin: 0;
+    padding: 2rem 1rem 4rem;
+    min-height: 100vh;
+  }
+
+  h2 {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    color: #3f51b5; /* dark indigo accent */
+  }
+
+  #filterType {
+    display: block;
+    margin: 0 auto 2rem;
+    padding: 10px 15px;
+    font-size: 1.1rem;
+    border: 1.8px solid #3f51b5;
+    border-radius: 30px;
+    max-width: 320px;
+    text-align: center;
+    cursor: pointer;
+    color: #3f51b5;
+    background-color: #e8eaf6;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  #filterType:hover, #filterType:focus {
+    background-color: #c5cae9;
+    outline: none;
+  }
+
+  table {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+  }
+
+  thead tr {
+    background-color: #e8eaf6; /* light indigo header */
+  }
+
+  thead th {
+    padding: 15px 20px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    color: #3f51b5;
+    text-align: left;
+    user-select: none;
+  }
+
+  tbody td {
+    padding: 14px 20px;
+    background-color: #f5f5f5;
+    color: #495057;
+  }
+
+  tbody tr:hover td {
+    background-color: #d1d9ff;
+    transition: background-color 0.3s ease;
+    cursor: default;
+  }
+
+  tbody tr td:first-child,
+  tbody tr td:last-child {
+    border-radius: 8px;
+  }
+  tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+  }
+  tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
+  }
+  tbody tr:first-child td:first-child {
+    border-top-left-radius: 8px;
+  }
+  tbody tr:first-child td:last-child {
+    border-top-right-radius: 8px;
+  }
+
+  .no-records {
+    text-align: center;
+    color: #868e96;
+    padding: 20px;
+    font-style: italic;
+    user-select: none;
+  }
+
+  a.button {
+    display: inline-block;
+    margin: 3rem auto 0 auto;
+    padding: 14px 28px;
+    background-color: #3f51b5;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    text-align: center;
+    border-radius: 30px;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none;
+    width: 220px;
+    box-shadow: 0 5px 18px rgba(63, 81, 181, 0.5);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  a.button:hover, a.button:focus {
+    background-color: #303f9f;
+    box-shadow: 0 7px 22px rgba(48, 63, 159, 0.7);
+    outline: none;
+  }
+
+  @media (max-width: 768px) {
+    table, thead th, tbody td {
+      font-size: 0.9rem;
+      padding: 10px 14px;
+    }
+    a.button {
+      width: 180px;
+      font-size: 1rem;
+      padding: 12px 24px;
+    }
+    #filterType {
+      max-width: 250px;
+    }
+  }
+  @media (max-width: 480px) {
+    table, thead th, tbody td {
+      font-size: 0.85rem;
+      padding: 8px 10px;
+    }
+    a.button {
+      width: 140px;
+      font-size: 0.9rem;
+      padding: 9px 20px;
+    }
+    #filterType {
+      font-size: 1rem;
+      max-width: 200px;
+    }
+  }
+</style>
+<script>
+  function filterChanged(e) {
+    const type = e.target.value;
+    window.location.href = `/history?type=${type}`;
+  }
+</script>
+</head>
+<body>
+
+  <h2>Transaction History</h2>
+
+  <select id="filterType" onchange="filterChanged(event)" aria-label="Filter transaction type">
+    <option value="material" {% if filter_type == 'material' %}selected{% endif %}>Material Transactions</option>
+    <option value="finished_goods" {% if filter_type == 'finished_goods' %}selected{% endif %}>Finished Goods Transactions</option>
+  </select>
+
+  <table role="table" aria-label="Transaction history table">
+    <thead>
+      <tr>
+        {% if filter_type == 'material' %}
+          <th>Material Code</th>
+          <th>Name</th>
+          <th>Transaction Type</th>
+          <th>Quantity</th>
+          <th>Date</th>
+          <th>Remarks</th>
+        {% else %}
+          <th>Product Code</th>
+          <th>Name</th>
+          <th>Transaction Type</th>
+          <th>Quantity</th>
+          <th>Date</th>
+          <th>Remarks</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for record in records %}
+        <tr>
+          {% if filter_type == 'material' %}
+            <td>{{ record.material.material_code }}</td>
+            <td>{{ record.material.material_name }}</td>
+            <td>{{ record.transaction_type }}</td>
+            <td>{{ record.quantity or '-' }}</td>
+            <td>{{ record.transaction_date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ record.remarks }}</td>
+          {% else %}
+            <td>{{ record.finished_product.product_code }}</td>
+            <td>{{ record.finished_product.name }}</td>
+            <td>{{ record.transaction_type }}</td>
+            <td>{{ record.quantity or '-' }}</td>
+            <td>{{ record.transaction_date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ record.remarks }}</td>
+          {% endif %}
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="6" class="no-records">No transactions found.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="{{ url_for('dashboard') }}" class="button" role="button" aria-label="Back to Dashboard">Back to Dashboard</a>
+
+</body>
+</html>

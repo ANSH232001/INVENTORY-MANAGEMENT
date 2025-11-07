@@ -1,0 +1,41 @@
+<!-- templates/intro.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Welcome</title>
+<style>
+  body {
+    margin: 0;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  #logo {
+    width: 200px;
+    height: 200px;
+    background-image: url('/static/logo.png'); /* Place your logo image here */
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<div id="logo"></div>
+<script>
+  // Redirect after 4 seconds
+  setTimeout(function() {
+    window.location.href = "/login";
+  }, 4000);
+</script>
+</body>
+</html>>
