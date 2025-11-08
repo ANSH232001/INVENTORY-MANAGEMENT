@@ -145,7 +145,7 @@ class PurchaseOrder(db.Model):
 class PurchaseOrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     purchase_order_id = db.Column(db.Integer, db.ForeignKey('purchase_order.id'), nullable=False)
-    material_id = db.Column(db.Integer, db.ForeignKey('material.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('material.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
 
     # Optional: Relationship to Material
@@ -854,6 +854,24 @@ def purchase_order():
         return redirect(url_for('dashboard'))
 
     return render_template('purchase_order.html', materials=materials)
+
+@app.route('/api/purchase_orders')
+def api_purchase_orders():
+    pos = PurchaseOrder.query.order_by(PurchaseOrder.date.desc()).all()
+    data = []
+    for po in pos:
+        data.append({
+            'id': po.id,
+            'purchase_order_number': po.purchase_order_number,
+            'grn_number': po.grn_number,
+            'invoice_number': po.invoice_number,
+            'date': po.date.strftime('%Y-%m-%d'),
+            'items': [{
+                'product_name': item.material.material_name if item.material else '',
+                'quantity': item.quantity
+            } for item in po.items]
+        })
+    return jsonify(data)
 
 
 
