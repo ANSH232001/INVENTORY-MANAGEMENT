@@ -147,9 +147,12 @@ class PurchaseOrderItem(db.Model):
     purchase_order_id = db.Column(db.Integer, db.ForeignKey('purchase_order.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('material.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
+    # rate = db.Column(db.Float, nullable=False)
+    # total = db.Column(db.Float, nullable=False)
 
     # Optional: Relationship to Material
     material = db.relationship('Material')
+
 
 
 
@@ -820,11 +823,23 @@ def search_materials():
     materials = Material.query.filter(Material.material_name.ilike(f'%{query}%')).all()
     results = [{'id': m.id, 'text': f"{m.material_name} (Stock: {m.current_stock})"} for m in materials]
     return jsonify(results)
+
+
+from sqlalchemy.exc import IntegrityError
+
+
 @app.route('/purchase_order', methods=['GET', 'POST'])
 def purchase_order():
     materials = Material.query.all()
     if request.method == 'POST':
         po_number = request.form['purchase_order_number']
+
+        # Check uniqueness first
+        existing_po = PurchaseOrder.query.filter_by(purchase_order_number=po_number).first()
+        if existing_po:
+            # Handle duplicate case - return error message or flash message
+            return "Purchase Order Number already exists. Please use a unique number.", 400
+
         invoice_number = request.form['invoice_number']
         grn_number = request.form['grn_number']
         new_po = PurchaseOrder(
@@ -850,10 +865,39 @@ def purchase_order():
                 material.current_stock += int(qty)
                 db.session.add(new_po_item)
 
-        db.session.commit()
+        # material_ids = request.form.getlist('material_id')
+        # quantities = request.form.getlist('quantity')
+        # rates = request.form.getlist('rate')
+        # totals = request.form.getlist('total')
+        #
+        # for mid, qty, rate, total in zip(material_ids, quantities, rates, totals):
+        #     qty = int(qty)
+        #     rate = float(rate)
+        #     total = float(total)
+        #     if qty > 0:
+        #         po_item = PurchaseOrderItem(
+        #             purchase_order_id=new_po.id,
+        #             product_id=int(mid),
+        #             quantity=qty,
+        #             rate=rate,
+        #             total=total
+        #         )
+        #         material = Material.query.get(int(mid))
+        #         material.current_stock += qty  # Update stock
+        #         db.session.add(po_item)
+
+
+
+        try:
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            return f"Database error: {str(e)}", 500
+
         return redirect(url_for('dashboard'))
 
     return render_template('purchase_order.html', materials=materials)
+
 
 @app.route('/api/purchase_orders')
 def api_purchase_orders():
