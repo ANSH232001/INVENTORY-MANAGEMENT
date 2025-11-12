@@ -29,7 +29,7 @@
     }
     header {
       display: flex;
-      justify-content: flex-start;
+      justify-content: space-between; /* changed from flex-start */
       align-items: center;
       padding-bottom: 10px;
       border-bottom: 1px solid #dee2e6;
@@ -37,6 +37,13 @@
       box-shadow: 0 2px 4px rgb(0 0 0 / 0.05);
       gap: 20px;
     }
+
+    .header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
     header h3 {
       margin: 0;
       font-weight: 600;
@@ -230,14 +237,15 @@
 </head>
 <body>
   <header>
-    <button id="newOrderBtn" class="btn btn-success">New</button>
-    <h3>Purchase Orders</h3>
+      <div class="header-left">
+        <button id="newOrderBtn" class="btn btn-success">New</button>
+        <h3>Purchase Orders</h3>
+      </div>
+    <input type="text" id="tableSearchInput" class="form-control mb-3" placeholder="Search Purchase Orders..." aria-label="Search Purchase Orders" style="max-width: 300px;" />
   </header>
 
   <div id="app-wrapper" class="container-fluid" role="main">
 
-    <!-- Search input on top left -->
-    <input type="text" id="tableSearchInput" class="form-control mb-3" placeholder="Search Purchase Orders..." aria-label="Search Purchase Orders" style="max-width: 300px;" />
 
     <!-- Responsive table wrapper -->
     <div class="table-responsive" aria-label="Purchase Orders Table Container">
@@ -255,7 +263,6 @@
     </div>
 
     <div id="detailsPanel"  tabindex="0">
-<!--      <h3>Purchase Order Details</h3>-->
       <dl class="row">
         <dt class="col-sm-3">PO Number:</dt><dd class="col-sm-9" id="detailPONumber"></dd>
         <dt class="col-sm-3">GRN Number:</dt><dd class="col-sm-9" id="detailGRNNumber"></dd>
@@ -510,6 +517,8 @@
       document.getElementById('detailsPanel').style.display = 'flex';
       document.getElementById('purchaseOrdersTable').style.display = 'none';
       document.getElementById('newOrderBtn').style.display = 'none';
+      document.getElementById('tableSearchInput').style.display = 'none';
+
       document.getElementById('poFormContainer').style.display = 'none';
     }
 
@@ -517,36 +526,26 @@
       document.getElementById('detailsPanel').style.display = 'none';
       document.getElementById('purchaseOrdersTable').style.display = 'table';
       document.getElementById('newOrderBtn').style.display = 'inline-block';
+      document.getElementById('tableSearchInput').style.display = 'inline-block';
     });
 
-    // document.getElementById('printBtn').addEventListener('click', () => {
-    //   const element = document.getElementById('detailsPanel');
-    //   html2pdf().set({
-    //     margin: 10,
-    //     filename: 'purchase_order_details.pdf',
-    //     image: { type: 'jpeg', quality: 0.98 },
-    //     html2canvas: { scale: 2 },
-    //     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    //   }).from(element).save();
-    // });
     document.getElementById('printBtn').addEventListener('click', () => {
-  const buttons = document.querySelectorAll('.no-print');
-  buttons.forEach(btn => btn.style.display = 'none');
+      const buttons = document.querySelectorAll('.no-print');
+      buttons.forEach(btn => btn.style.display = 'none');
 
-  const element = document.getElementById('detailsPanel');
-  html2pdf().set({
-    margin: 10,
-    filename: 'purchase_order_details.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  }).from(element).save()
-    .finally(() => {
-      // Restore buttons display after PDF is saved
-      buttons.forEach(btn => btn.style.display = '');
+      const element = document.getElementById('detailsPanel');
+      html2pdf().set({
+        margin: 10,
+        filename: 'purchase_order_details.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(element).save()
+      .finally(() => {
+        // Restore buttons display after PDF is saved
+        buttons.forEach(btn => btn.style.display = '');
+      });
     });
-});
-
 
     async function init() {
       const purchaseOrders = await fetchPurchaseOrders();
@@ -556,4 +555,3 @@
   </script>
 </body>
 </html>
-

@@ -80,6 +80,8 @@ class FinishedProduct(db.Model):
     dealer_zone = db.Column(db.String(100))
     current_stock = db.Column(db.Integer)
 
+
+
 class Vendor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vendor_code = db.Column(db.String(50), unique=True, nullable=False)
@@ -152,6 +154,16 @@ class PurchaseOrderItem(db.Model):
 
     # Optional: Relationship to Material
     material = db.relationship('Material')
+
+class Customer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_code = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    rate = db.Column(db.Float(50))
+    capacity = db.Column(db.Float(50))
+    configuration = db.Column(db.String(100))
+    model_name = db.Column(db.String(100))
+    current_stock = db.Column(db.Integer)
 
 
 
@@ -329,12 +341,14 @@ def dashboard():
     vendor_count = Vendor.query.count()
     invoice_count = Invoice.query.count()
     purchase_order_count = PurchaseOrder.query.count()
+    customer_count = Customer.query.count()
     recent_purchase_orders = PurchaseOrder.query.order_by(PurchaseOrder.date.desc()).limit(5).all()
 
     return render_template('dashboard.html',
                            material_count=material_count,
                            finished_product_count=finished_product_count,
                            vendor_count=vendor_count,
+                           customer_count=customer_count,
                            invoice_count=invoice_count,
                            purchase_order_count=purchase_order_count,
                            recent_purchase_orders=recent_purchase_orders)
@@ -916,6 +930,14 @@ def api_purchase_orders():
             } for item in po.items]
         })
     return jsonify(data)
+
+
+@app.route('/customer')
+def customer():
+    # For example, you can query FinishedProduct to get the fields to show in the table
+    products = FinishedProduct.query.all()
+    return render_template('customer.html', products=products)
+
 
 
 
