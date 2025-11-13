@@ -80,6 +80,8 @@ class FinishedProduct(db.Model):
     dealer_zone = db.Column(db.String(100))
     current_stock = db.Column(db.Integer)
 
+
+
 class Vendor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vendor_code = db.Column(db.String(50), unique=True, nullable=False)
