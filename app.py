@@ -168,6 +168,8 @@ class Customer(db.Model):
 
 
 
+
+
 def generate_material_code():
     last_material = Material.query.order_by(Material.id.desc()).first()
     if last_material and last_material.material_code.startswith('ATPL-'):
@@ -332,6 +334,7 @@ def delete_vendor(id):
         db.session.rollback()
         flash('Failed to delete vendor.', 'danger')
     return redirect(url_for('show_vendors'))
+
 
 
 @app.route('/dashboard')
@@ -934,12 +937,8 @@ def api_purchase_orders():
 
 @app.route('/customer')
 def customer():
-    # For example, you can query FinishedProduct to get the fields to show in the table
     products = FinishedProduct.query.all()
     return render_template('customer.html', products=products)
-
-
-
 
 @app.route('/logout')
 @login_required
