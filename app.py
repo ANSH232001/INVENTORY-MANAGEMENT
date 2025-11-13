@@ -153,6 +153,18 @@ class PurchaseOrderItem(db.Model):
     # Optional: Relationship to Material
     material = db.relationship('Material')
 
+class Customer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_code = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    rate = db.Column(db.Float(50))
+    capacity = db.Column(db.Float(50))
+    configuration = db.Column(db.String(100))
+    model_name = db.Column(db.String(100))
+    current_stock = db.Column(db.Integer)
+
+
+
 
 
 
@@ -322,6 +334,7 @@ def delete_vendor(id):
     return redirect(url_for('show_vendors'))
 
 
+
 @app.route('/dashboard')
 def dashboard():
     material_count = Material.query.count()
@@ -329,12 +342,14 @@ def dashboard():
     vendor_count = Vendor.query.count()
     invoice_count = Invoice.query.count()
     purchase_order_count = PurchaseOrder.query.count()
+    customer_count = Customer.query.count()
     recent_purchase_orders = PurchaseOrder.query.order_by(PurchaseOrder.date.desc()).limit(5).all()
 
     return render_template('dashboard.html',
                            material_count=material_count,
                            finished_product_count=finished_product_count,
                            vendor_count=vendor_count,
+                           customer_count=customer_count,
                            invoice_count=invoice_count,
                            purchase_order_count=purchase_order_count,
                            recent_purchase_orders=recent_purchase_orders)
@@ -918,6 +933,10 @@ def api_purchase_orders():
     return jsonify(data)
 
 
+@app.route('/customer')
+def customer():
+    products = FinishedProduct.query.all()
+    return render_template('customer.html', products=products)
 
 @app.route('/logout')
 @login_required
