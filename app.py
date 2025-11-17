@@ -136,6 +136,25 @@ class InvoiceItem(db.Model):
     line_total = db.Column(db.Float)
     invoice = db.relationship('Invoice', backref=db.backref('items', lazy=True))
 
+# class PurchaseOrder(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     purchase_order_number = db.Column(db.String(50), unique=True, nullable=False)
+#     grn_number = db.Column(db.String(50), unique=True, nullable=False)
+#     invoice_number = db.Column(db.String(50), nullable=False)
+#     date = db.Column(db.Date, default=datetime.utcnow)
+#     items = db.relationship('PurchaseOrderItem', backref='purchase_order', lazy=True)
+#
+# class PurchaseOrderItem(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     purchase_order_id = db.Column(db.Integer, db.ForeignKey('purchase_order.id'), nullable=False)
+#     product_id = db.Column(db.Integer, db.ForeignKey('material.id'), nullable=False)
+#     quantity = db.Column(db.Integer, nullable=False)
+#     # rate = db.Column(db.Float, nullable=False)
+#     # total = db.Column(db.Float, nullable=False)
+#
+#     # Optional: Relationship to Material
+#     material = db.relationship('Material')
+
 class PurchaseOrder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     purchase_order_number = db.Column(db.String(50), unique=True, nullable=False)
@@ -149,8 +168,12 @@ class PurchaseOrderItem(db.Model):
     purchase_order_id = db.Column(db.Integer, db.ForeignKey('purchase_order.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('material.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    # rate = db.Column(db.Float, nullable=False)
-    # total = db.Column(db.Float, nullable=False)
+    rate = db.Column(db.Float, nullable=False)
+    total = db.Column(db.Float, nullable=False)
+
+    #invoice_number = db.Column(db.String(50), nullable=False)
+   # purchase_order_number = db.Column(db.String(50), unique=True, nullable=False)
+    #date = db.Column(db.Date, default=datetime.utcnow)
 
     # Optional: Relationship to Material
     material = db.relationship('Material')
@@ -195,45 +218,109 @@ def splash():
 
 from flask import flash
 
+# @app.route('/add_purchase_order', methods=['GET', 'POST'])
+# def add_purchase_order():
+#     materials = Material.query.all()
+#     if request.method == 'POST':
+#         po_number = request.form['purchase_order_number']
+#         invoice_number = request.form['invoice_number']
+#         grn_number = request.form['grn_number']
+#         date_str = request.form['date']
+#         grn_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+#
+#         new_po = PurchaseOrder(
+#             purchase_order_number=po_number,
+#             grn_number=grn_number,
+#             invoice_number=invoice_number,
+#             date=grn_date
+#         )
+#         db.session.add(new_po)
+#         db.session.flush()
+#
+#         material_id = int(request.form['material_id'])
+#         quantity = int(request.form['quantity'])
+#         if quantity > 0:
+#             po_item = PurchaseOrderItem(
+#                 purchase_order_id=new_po.id,
+#                 material_id=material_id,
+#                 quantity=quantity
+#             )
+#             material = Material.query.get(material_id)
+#             material.current_stock += quantity
+#             db.session.add(po_item)
+#
+#         db.session.commit()
+#         return redirect(url_for('dashboard'))
+#
+#     # On GET, generate GRN and current date to populate the form
+#     generated_grn = generate_grn_number()
+#     today_date = datetime.today().strftime('%Y-%m-%d')
+#     return render_template('add_purchase_order.html', materials=materials, generated_grn=generated_grn, today_date=today_date)
+
+
 @app.route('/add_purchase_order', methods=['GET', 'POST'])
 def add_purchase_order():
     materials = Material.query.all()
+    purchase_orders = PurchaseOrder.query.order_by(PurchaseOrder.date.desc()).limit(10).all()
+    # needed for GET and on error re-render
+
+
     if request.method == 'POST':
-        po_number = request.form['purchase_order_number']
-        invoice_number = request.form['invoice_number']
-        grn_number = request.form['grn_number']
-        date_str = request.form['date']
-        grn_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        try:
+            po_number = request.form['purchase_order_number']
+            invoice_number = request.form['invoice_number']
+            grn_number = request.form['grn_number']
+            date_str = request.form.get('date', datetime.today().strftime('%Y-%m-%d'))
+            grn_date = datetime.strptime(date_str, '%Y-%m-%d').date()
 
-        new_po = PurchaseOrder(
-            purchase_order_number=po_number,
-            grn_number=grn_number,
-            invoice_number=invoice_number,
-            date=grn_date
-        )
-        db.session.add(new_po)
-        db.session.flush()
+            material_ids = request.form.getlist('material_id')
+            quantities = request.form.getlist('quantity')
+            rates = request.form.getlist('rate')
+            totals = request.form.getlist('total')
 
-        material_id = int(request.form['material_id'])
-        quantity = int(request.form['quantity'])
-        if quantity > 0:
-            po_item = PurchaseOrderItem(
-                purchase_order_id=new_po.id,
-                material_id=material_id,
-                quantity=quantity
+            if not all([po_number, invoice_number, grn_number]):
+                raise ValueError("Missing required purchase order fields")
+
+            new_po = PurchaseOrder(
+                purchase_order_number=po_number,
+                invoice_number=invoice_number,
+                grn_number=grn_number,
+                date=grn_date
             )
-            material = Material.query.get(material_id)
-            material.current_stock += quantity
-            db.session.add(po_item)
+            db.session.add(new_po)
+            db.session.flush()
 
-        db.session.commit()
-        return redirect(url_for('dashboard'))
+            for mid, qty, rate, total in zip(material_ids, quantities, rates, totals):
+                qty = int(qty)
+                rate = float(rate)
+                total = float(total)
+                if qty > 0:
+                    po_item = PurchaseOrderItem(
+                        purchase_order_id=new_po.id,
+                        product_id=int(mid),
+                        quantity=qty,
+                        rate=rate,
+                        total=total
+                    )
+                    material = Material.query.get(int(mid))
+                    material.current_stock += qty  # Update stock
+                    db.session.add(po_item)
 
-    # On GET, generate GRN and current date to populate the form
+            db.session.commit()
+            return jsonify({"success": True, "message": "Purchase order added successfully"})
+
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"success": False, "error": str(e)}), 400
+
+    # For GET request render page with materials list
     generated_grn = generate_grn_number()
     today_date = datetime.today().strftime('%Y-%m-%d')
-    return render_template('add_purchase_order.html', materials=materials, generated_grn=generated_grn, today_date=today_date)
-
+    return render_template('purchase_order.html',
+                           materials=materials,
+                           generated_grn=generated_grn,
+                           today_date=today_date,
+                           purchase_orders=purchase_orders)
 
 @app.route('/modify_material/<int:material_id>', methods=['GET', 'POST'])
 def modify_material(material_id):
@@ -493,9 +580,7 @@ def add_finished_product():
         db.session.add(product)
         db.session.commit()      # Get product.id assigned before commit
 
-
             # other fields...
-
 
         transaction = FinishedProductTransaction(
             finished_product_id=product.id,
@@ -845,94 +930,94 @@ def search_materials():
 from sqlalchemy.exc import IntegrityError
 
 
-@app.route('/purchase_order', methods=['GET', 'POST'])
-def purchase_order():
-    materials = Material.query.all()
-    if request.method == 'POST':
-        po_number = request.form['purchase_order_number']
-
-        # Check uniqueness first
-        existing_po = PurchaseOrder.query.filter_by(purchase_order_number=po_number).first()
-        if existing_po:
-            # Handle duplicate case - return error message or flash message
-            return "Purchase Order Number already exists. Please use a unique number.", 400
-
-        invoice_number = request.form['invoice_number']
-        grn_number = request.form['grn_number']
-        new_po = PurchaseOrder(
-            purchase_order_number=po_number,
-            invoice_number=invoice_number,
-            grn_number=grn_number,
-            date=datetime.today()
-        )
-        db.session.add(new_po)
-        db.session.flush()
-
-        material_ids = request.form.getlist('material_id')
-        quantities = request.form.getlist('quantity')
-
-        for mid, qty in zip(material_ids, quantities):
-            material = Material.query.get(int(mid))
-            if material and int(qty) > 0:
-                new_po_item = PurchaseOrderItem(
-                    purchase_order_id=new_po.id,
-                    product_id=material.id,
-                    quantity=int(qty)
-                )
-                material.current_stock += int(qty)
-                db.session.add(new_po_item)
-
-        # material_ids = request.form.getlist('material_id')
-        # quantities = request.form.getlist('quantity')
-        # rates = request.form.getlist('rate')
-        # totals = request.form.getlist('total')
-        #
-        # for mid, qty, rate, total in zip(material_ids, quantities, rates, totals):
-        #     qty = int(qty)
-        #     rate = float(rate)
-        #     total = float(total)
-        #     if qty > 0:
-        #         po_item = PurchaseOrderItem(
-        #             purchase_order_id=new_po.id,
-        #             product_id=int(mid),
-        #             quantity=qty,
-        #             rate=rate,
-        #             total=total
-        #         )
-        #         material = Material.query.get(int(mid))
-        #         material.current_stock += qty  # Update stock
-        #         db.session.add(po_item)
-
-
-
-        try:
-            db.session.commit()
-        except IntegrityError as e:
-            db.session.rollback()
-            return f"Database error: {str(e)}", 500
-
-        return redirect(url_for('dashboard'))
-
-    return render_template('purchase_order.html', materials=materials)
-
-
-@app.route('/api/purchase_orders')
-def api_purchase_orders():
-    pos = PurchaseOrder.query.order_by(PurchaseOrder.date.desc()).all()
-    data = []
-    for po in pos:
-        data.append({
-            'id': po.id,
-            'purchase_order_number': po.purchase_order_number,
-            'grn_number': po.grn_number,
-            'invoice_number': po.invoice_number,
-            'date': po.date.strftime('%Y-%m-%d'),
-            'items': [{
-                'product_name': item.material.material_name if item.material else '',
-                'quantity': item.quantity
-            } for item in po.items]
-        })
-    return jsonify(data)
+# @app.route('/purchase_order', methods=['GET', 'POST'])
+# def purchase_order():
+#     materials = Material.query.all()
+#     if request.method == 'POST':
+#         po_number = request.form['purchase_order_number']
+#
+#         # Check uniqueness first
+#         existing_po = PurchaseOrder.query.filter_by(purchase_order_number=po_number).first()
+#         if existing_po:
+#             # Handle duplicate case - return error message or flash message
+#             return "Purchase Order Number already exists. Please use a unique number.", 400
+#
+#         invoice_number = request.form['invoice_number']
+#         grn_number = request.form['grn_number']
+#         new_po = PurchaseOrder(
+#             purchase_order_number=po_number,
+#             invoice_number=invoice_number,
+#             grn_number=grn_number,
+#             date=datetime.today()
+#         )
+#         db.session.add(new_po)
+#         db.session.flush()
+#
+#         material_ids = request.form.getlist('material_id')
+#         quantities = request.form.getlist('quantity')
+#
+#         for mid, qty in zip(material_ids, quantities):
+#             material = Material.query.get(int(mid))
+#             if material and int(qty) > 0:
+#                 new_po_item = PurchaseOrderItem(
+#                     purchase_order_id=new_po.id,
+#                     product_id=material.id,
+#                     quantity=int(qty)
+#                 )
+#                 material.current_stock += int(qty)
+#                 db.session.add(new_po_item)
+#
+#         # material_ids = request.form.getlist('material_id')
+#         # quantities = request.form.getlist('quantity')
+#         # rates = request.form.getlist('rate')
+#         # totals = request.form.getlist('total')
+#         #
+#         # for mid, qty, rate, total in zip(material_ids, quantities, rates, totals):
+#         #     qty = int(qty)
+#         #     rate = float(rate)
+#         #     total = float(total)
+#         #     if qty > 0:
+#         #         po_item = PurchaseOrderItem(
+#         #             purchase_order_id=new_po.id,
+#         #             product_id=int(mid),
+#         #             quantity=qty,
+#         #             rate=rate,
+#         #             total=total
+#         #         )
+#         #         material = Material.query.get(int(mid))
+#         #         material.current_stock += qty  # Update stock
+#         #         db.session.add(po_item)
+#
+#
+#
+#         try:
+#             db.session.commit()
+#         except IntegrityError as e:
+#             db.session.rollback()
+#             return f"Database error: {str(e)}", 500
+#
+#         return redirect(url_for('dashboard'))
+#
+#     return render_template('purchase_order.html', materials=materials)
+#
+#
+# @app.route('/api/purchase_orders')
+# def api_purchase_orders():
+#     pos = PurchaseOrder.query.order_by(PurchaseOrder.date.desc()).all()
+#     data = []
+#     for po in pos:
+#         data.append({
+#             'id': po.id,
+#             'purchase_order_number': po.purchase_order_number,
+#             'grn_number': po.grn_number,
+#             'invoice_number': po.invoice_number,
+#             'date': po.date.strftime('%Y-%m-%d'),
+#             'items': [{
+#                 'product_name': item.material.material_name if item.material else '',
+#                 'quantity': item.quantity
+#             } for item in po.items]
+#         })
+#     return jsonify(data)
 
 
 @app.route('/customer')

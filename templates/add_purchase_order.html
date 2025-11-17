@@ -1,557 +1,1052 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8" />-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1" />-->
+<!--  <title>Purchase Orders</title>-->
+<!--  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />-->
+<!--  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />-->
+<!--  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />-->
+<!--  <style>-->
+<!--    html, body {-->
+<!--      height: 100%; margin: 0;-->
+<!--      background-color: #f0f2f5;-->
+<!--      font-family: Arial, sans-serif;-->
+<!--      overflow: hidden;-->
+<!--    }-->
+<!--    body {-->
+<!--      display: flex;-->
+<!--      flex-direction: column;-->
+<!--    }-->
+<!--    #app-wrapper {-->
+<!--      flex: 1 1 auto;-->
+<!--      display: flex;-->
+<!--      flex-direction: column;-->
+<!--      padding: 20px 30px;-->
+<!--      gap: 20px;-->
+<!--      overflow: hidden;-->
+<!--      max-width: 100vw;-->
+<!--    }-->
+<!--    header {-->
+<!--      display: flex;-->
+<!--      justify-content: space-between; /* changed from flex-start */-->
+<!--      align-items: center;-->
+<!--      padding-bottom: 10px;-->
+<!--      border-bottom: 1px solid #dee2e6;-->
+<!--      background: white;-->
+<!--      box-shadow: 0 2px 4px rgb(0 0 0 / 0.05);-->
+<!--      gap: 20px;-->
+<!--    }-->
+
+<!--    .header-left {-->
+<!--  display: flex;-->
+<!--  align-items: center;-->
+<!--  gap: 20px;-->
+<!--}-->
+
+<!--    header h3 {-->
+<!--      margin: 0;-->
+<!--      font-weight: 600;-->
+<!--      font-size: 1.8rem;-->
+<!--      color: #343a40;-->
+<!--    }-->
+<!--    #newOrderBtn {-->
+<!--      font-weight: 600;-->
+<!--      font-size: 1rem;-->
+<!--      padding: 8px 20px;-->
+<!--    }-->
+<!--    #purchaseOrdersTable, #detailsPanel, #poFormContainer {-->
+<!--      flex: 1 1 auto;-->
+<!--      overflow-y: auto;-->
+<!--    }-->
+<!--    .container-fluid {-->
+<!--      width: 100%;-->
+<!--      height: 100%;-->
+<!--      display: flex;-->
+<!--      flex-direction: column;-->
+<!--      gap: 10px;-->
+<!--    }-->
+<!--    table {-->
+<!--      border-collapse: collapse !important;-->
+<!--      width: 100%;-->
+<!--      background-color: white;-->
+<!--      color: #2c3e50;-->
+<!--      border: 1px solid #dee2e6;-->
+<!--      border-radius: 8px;-->
+<!--      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);-->
+<!--      white-space: nowrap;-->
+<!--    }-->
+<!--    thead tr {-->
+<!--      background-color: #5a35cc;-->
+<!--      color: white;-->
+<!--      font-weight: 600;-->
+<!--      font-size: 1rem;-->
+<!--      border-bottom: 2px solid #6741d9;-->
+<!--    }-->
+<!--    tbody tr {-->
+<!--      transition: background-color 0.2s ease;-->
+<!--      cursor: pointer;-->
+<!--    }-->
+<!--    tbody tr:nth-child(odd) {-->
+<!--      background-color: #f8f8f8;-->
+<!--    }-->
+<!--    tbody tr:hover, tbody tr:focus-visible {-->
+<!--      background-color: #d9d6f9;-->
+<!--      outline: none;-->
+<!--    }-->
+<!--    td, th {-->
+<!--      padding: 12px 15px !important;-->
+<!--      border: 1px solid #dee2e6 !important;-->
+<!--      vertical-align: middle !important;-->
+<!--      font-size: 0.95rem;-->
+<!--    }-->
+<!--    #detailsPanel, #poFormContainer {-->
+<!--      background: white;-->
+<!--      border-radius: 12px;-->
+<!--      box-shadow: 0 10px 25px rgb(123 95 255 / 0.15);-->
+<!--      padding: 30px;-->
+<!--      display: none;-->
+<!--      flex-direction: column;-->
+<!--      overflow-y: auto;-->
+<!--      height: 100%;-->
+<!--    }-->
+<!--    #detailsPanel h3, #poFormContainer h2 {-->
+<!--      font-weight: 600;-->
+<!--      margin-bottom: 1rem;-->
+<!--      color: #572cff;-->
+<!--    }-->
+<!--    dl.row dt {-->
+<!--      color: #6e6e7a;-->
+<!--      font-weight: 600;-->
+<!--    }-->
+<!--    dl.row dd {-->
+<!--      color: #222;-->
+<!--      margin-bottom: 0.75rem;-->
+<!--    }-->
+<!--    #productListBody td {-->
+<!--      font-size: 0.95rem;-->
+<!--    }-->
+<!--    .add-product-btn {-->
+<!--      margin-top: 15px;-->
+<!--      padding: 10px 20px;-->
+<!--      border: 2px solid #7b5fff;-->
+<!--      color: #7b5fff;-->
+<!--      font-weight: 700;-->
+<!--      border-radius: 8px;-->
+<!--      cursor: pointer;-->
+<!--      user-select: none;-->
+<!--      font-size: 1rem;-->
+<!--      background-color: transparent;-->
+<!--      display: inline-block;-->
+<!--      transition: background-color 0.3s ease, color 0.3s ease;-->
+<!--      width: fit-content;-->
+<!--    }-->
+<!--    .add-product-btn:hover, .add-product-btn:focus {-->
+<!--      background-color: #7b5fff;-->
+<!--      color: white;-->
+<!--      outline: none;-->
+<!--    }-->
+<!--    .remove-product {-->
+<!--      font-size: 1.4rem;-->
+<!--      color: #dc3545;-->
+<!--      background-color: transparent;-->
+<!--      border: none;-->
+<!--      cursor: pointer;-->
+<!--      display: flex; justify-content: center; align-items: center;-->
+<!--      padding: 0; width: 36px; height: 36px;-->
+<!--      transition: color 0.3s ease;-->
+<!--      border-radius: 6px;-->
+<!--    }-->
+<!--    .remove-product:hover, .remove-product:focus {-->
+<!--      color: #b02a37;-->
+<!--      outline: none;-->
+<!--    }-->
+<!--    form#poForm input.form-control, form#poForm select.form-control {-->
+<!--      font-size: 1rem;-->
+<!--      border-radius: 8px;-->
+<!--      padding: 8px 12px;-->
+<!--      border: 1.5px solid #d1d3e0;-->
+<!--      transition: border-color 0.3s ease;-->
+<!--    }-->
+<!--    form#poForm input.form-control:focus, form#poForm select.form-control:focus {-->
+<!--      border-color: #7b5fff;-->
+<!--      box-shadow: 0 0 3px 1px rgba(123, 95, 255, 0.4);-->
+<!--      outline: none;-->
+<!--    }-->
+<!--    #poForm button[type=submit] {-->
+<!--      max-width: 300px;-->
+<!--      font-size: 1rem;-->
+<!--      font-weight: 700;-->
+<!--      padding: 12px;-->
+<!--      border-radius: 10px;-->
+<!--      background-color: #7b5fff;-->
+<!--      border: none;-->
+<!--      color: white;-->
+<!--      transition: background-color 0.3s ease;-->
+<!--    }-->
+<!--    #poForm button[type=submit]:hover, #poForm button[type=submit]:focus {-->
+<!--      background-color: #5a3acc;-->
+<!--      outline: none;-->
+<!--    }-->
+<!--    #cancelBtn {-->
+<!--      max-width: 300px;-->
+<!--      font-size: 1rem;-->
+<!--      font-weight: 600;-->
+<!--      padding: 12px;-->
+<!--      border-radius: 10px;-->
+<!--    }-->
+<!--    #purchaseOrdersTable::-webkit-scrollbar,-->
+<!--    #detailsPanel::-webkit-scrollbar,-->
+<!--    #poFormContainer::-webkit-scrollbar {-->
+<!--      width: 8px;-->
+<!--    }-->
+<!--    #purchaseOrdersTable::-webkit-scrollbar-thumb,-->
+<!--    #detailsPanel::-webkit-scrollbar-thumb,-->
+<!--    #poFormContainer::-webkit-scrollbar-thumb {-->
+<!--      background-color: #7b5fff88;-->
+<!--      border-radius: 10px;-->
+<!--    }-->
+<!--    @media (max-width: 768px) {-->
+<!--      header {-->
+<!--        flex-direction: column;-->
+<!--        align-items: flex-start;-->
+<!--        gap: 8px;-->
+<!--      }-->
+<!--      #newOrderBtn {-->
+<!--        width: 100%;-->
+<!--      }-->
+<!--      #poForm .mb-1, #poForm .mb-3 {-->
+<!--        max-width: 100% !important;-->
+<!--      }-->
+<!--      table thead tr th, table tbody tr td {-->
+<!--        font-size: 0.85rem;-->
+<!--      }-->
+<!--      #tableSearchInput {-->
+<!--        width: 100%;-->
+<!--        margin-bottom: 10px;-->
+<!--      }-->
+<!--    }-->
+
+<!--    @media print {-->
+<!--  .no-print {-->
+<!--    display: none !important;-->
+<!--  }-->
+<!--}-->
+
+<!--  </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--  <header>-->
+<!--      <div class="header-left">-->
+<!--        <button id="newOrderBtn" class="btn btn-success">New</button>-->
+<!--        <h3>Purchase Orders</h3>-->
+<!--      </div>-->
+<!--    <input type="text" id="tableSearchInput" class="form-control mb-3" placeholder="Search Purchase Orders..." aria-label="Search Purchase Orders" style="max-width: 300px;" />-->
+<!--  </header>-->
+
+<!--  <div id="app-wrapper" class="container-fluid" role="main">-->
+
+
+<!--    &lt;!&ndash; Responsive table wrapper &ndash;&gt;-->
+<!--    <div class="table-responsive" aria-label="Purchase Orders Table Container">-->
+<!--      <table class="table table-striped table-bordered table-hover" id="purchaseOrdersTable" aria-label="Purchase Orders List">-->
+<!--        <thead>-->
+<!--          <tr>-->
+<!--            <th>PO Number</th>-->
+<!--            <th>GRN Number</th>-->
+<!--            <th>Invoice Number</th>-->
+<!--            <th>Date</th>-->
+<!--          </tr>-->
+<!--        </thead>-->
+<!--        <tbody id="poListBody" aria-live="polite"></tbody>-->
+<!--      </table>-->
+<!--    </div>-->
+
+<!--    <div id="detailsPanel"  tabindex="0">-->
+<!--      <dl class="row">-->
+<!--        <dt class="col-sm-3">PO Number:</dt><dd class="col-sm-9" id="detailPONumber"></dd>-->
+<!--        <dt class="col-sm-3">GRN Number:</dt><dd class="col-sm-9" id="detailGRNNumber"></dd>-->
+<!--        <dt class="col-sm-3">Invoice Number:</dt><dd class="col-sm-9" id="detailInvoiceNumber"></dd>-->
+<!--        <dt class="col-sm-3">GRN Date:</dt><dd class="col-sm-9" id="detailDate"></dd>-->
+<!--      </dl>-->
+<!--      <h4>Products</h4>-->
+<!--      <table class="table table-bordered" aria-label="Products table">-->
+<!--        <thead>-->
+<!--          <tr>-->
+<!--            <th>Product</th>-->
+<!--            <th>Quantity</th>-->
+<!--            <th>Rate</th>-->
+<!--            <th>Total</th>-->
+<!--          </tr>-->
+<!--        </thead>-->
+<!--        <tbody id="productListBody"></tbody>-->
+<!--      </table>-->
+<!--      <div class="d-flex justify-content-start gap-2 mt-3">-->
+<!--        <button id="printBtn" class="btn btn-primary no-print">Print PDF</button>-->
+<!--        <button id="closeBtn" class="btn btn-secondary no-print">Close</button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    <div id="poFormContainer" tabindex="0" aria-label="Add Purchase Order Form" style="display:none;">-->
+<!--      <h2 class="mb-4">Add Purchase Order</h2>-->
+<!--      <form id="poForm" method="POST" action="{{ url_for('purchase_order') }}">-->
+<!--        <div class="mb-3">-->
+<!--          <label for="purchase_order_number" class="form-label">Purchase Order Number:</label>-->
+<!--          <input type="text" id="purchase_order_number" name="purchase_order_number" class="form-control" required placeholder="Enter Purchase Order Number" autocomplete="off" />-->
+<!--        </div>-->
+<!--        <div class="mb-1 d-flex align-items-center flex-wrap" style="gap: 1rem;">-->
+<!--          <div class="mb-3" style="flex: 1 1 300px; min-width: 250px;">-->
+<!--            <label for="grn_number" class="form-label">GRN Number:</label>-->
+<!--            <input type="text" class="form-control" id="grn_number" name="grn_number" value="{{ generated_grn }}" readonly autocomplete="off" />-->
+<!--          </div>-->
+<!--          <div style="text-align: right; font-weight: 700; font-size: 1rem; background: whitesmoke; color: #444; padding: 6px 14px; border-radius: 12px; user-select: none; min-width: 200px;">-->
+<!--            GRN Date: {{ today_date }}-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        <div class="mb-3">-->
+<!--          <label for="invoice_number" class="form-label">Invoice Number:</label>-->
+<!--          <input type="text" id="invoice_number" name="invoice_number" class="form-control" required placeholder="Enter Invoice Number" autocomplete="off" />-->
+<!--        </div>-->
+<!--        <div class="mb-3">-->
+<!--          <table class="table table-bordered mb-0" id="products-table" aria-label="Products table">-->
+<!--            <thead class="table-light">-->
+<!--              <tr>-->
+<!--                <th style="width: 20%;">Product</th>-->
+<!--                <th style="width: 10%;">Material Code</th>-->
+<!--                <th style="width: 15%;">Vendor</th>-->
+<!--                <th style="width: 10%;">Uom</th>-->
+<!--                <th style="width: 10%;">Current Stock</th>-->
+<!--                <th style="width: 10%;">Quantity</th>-->
+<!--                <th style="width: 10%;">Rate</th>-->
+<!--                <th style="width: 10%;">Total</th>-->
+<!--                <th style="width: 5%;"></th>-->
+<!--              </tr>-->
+<!--            </thead>-->
+<!--            <tbody id="products-container" aria-live="polite" aria-relevant="additions removals"></tbody>-->
+<!--          </table>-->
+<!--          <div class="add-product-btn" id="add-product-btn" tabindex="0" role="button" aria-label="Add a product">Add a product</div>-->
+<!--        </div>-->
+<!--        <div class="d-flex flex-wrap gap-2 mt-4">-->
+<!--          <button type="submit" class="btn btn-primary">Add Purchase Order</button>-->
+<!--          <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>-->
+<!--        </div>-->
+<!--      </form>-->
+<!--    </div>-->
+
+<!--  </div>-->
+
+<!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>-->
+<!--  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
+<!--  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+<!--  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>-->
+<!--  <script>-->
+<!--    document.getElementById('poFormContainer').style.display = 'none';-->
+<!--    document.getElementById('detailsPanel').style.display = 'none';-->
+
+<!--    const productDataMap = {-->
+<!--      {% for material in materials %}-->
+<!--      "{{ material.id }}": {-->
+<!--        material_code: {{ material.material_code|tojson }},-->
+<!--        vendor: {{ material.vendor|tojson }},-->
+<!--        uom: {{ material.unit_of_measurement|tojson }},-->
+<!--        current_stock: {{ material.current_stock }},-->
+<!--        rate: {{ material.rate if material.rate is defined else 0 }}-->
+<!--      }{% if not loop.last %},{% endif %}-->
+<!--      {% endfor %}-->
+<!--    };-->
+
+<!--    const container = document.getElementById('products-container');-->
+
+<!--    function calculateTotal(row) {-->
+<!--      const qtyInput = row.querySelector('input[name="quantity"]');-->
+<!--      const rateInput = row.querySelector('input[name="rate"]');-->
+<!--      const totalInput = row.querySelector('input[name="total"]');-->
+
+<!--      const qty = parseFloat(qtyInput.value) || 0;-->
+<!--      const rate = parseFloat(rateInput.value) || 0;-->
+
+<!--      totalInput.value = (qty * rate).toFixed(2);-->
+<!--    }-->
+
+<!--    function addProductRow() {-->
+<!--      const tr = document.createElement('tr');-->
+<!--      tr.classList.add('product-row', 'align-middle');-->
+
+<!--      let optionsHTML = '<option></option>';-->
+<!--      {% for material in materials %}-->
+<!--      optionsHTML += `<option value="{{ material.id }}">{{ material.material_name }}</option>`;-->
+<!--      {% endfor %}-->
+
+<!--      tr.innerHTML = `-->
+<!--        <td>-->
+<!--          <select class="select2-select-material" name="material_id" style="width: 100%;" required>-->
+<!--            ${optionsHTML}-->
+<!--          </select>-->
+<!--        </td>-->
+<!--        <td><input type="text" name="material_code" class="form-control" readonly /></td>-->
+<!--        <td><input type="text" name="vendor" class="form-control" readonly /></td>-->
+<!--        <td><input type="text" name="uom" class="form-control" readonly /></td>-->
+<!--        <td><input type="number" name="current_stock" class="form-control" readonly /></td>-->
+<!--        <td><input type="number" name="quantity" class="form-control" min="1" required value="0" /></td>-->
+<!--        <td><input type="number" name="rate" class="form-control" min="0" step="0.01" required value="0" /></td>-->
+<!--        <td><input type="text" name="total" class="form-control" readonly value="0.00" /></td>-->
+<!--        <td class="text-center">-->
+<!--          <button type="button" class="remove-product" title="Remove product" aria-label="Remove product">-->
+<!--            <i class="bi bi-trash-fill"></i>-->
+<!--          </button>-->
+<!--        </td>-->
+<!--      `;-->
+
+<!--      container.appendChild(tr);-->
+
+<!--      const select = $(tr).find('.select2-select-material');-->
+<!--      select.select2({-->
+<!--        placeholder: 'Search product',-->
+<!--        allowClear: true,-->
+<!--        width: 'resolve'-->
+<!--      });-->
+
+<!--      select.on('change', function() {-->
+<!--        const val = this.value;-->
+<!--        const data = productDataMap[val] || {material_code: '', vendor: '', uom: '', current_stock: '', rate: 0};-->
+<!--        const row = this.closest('tr');-->
+<!--        row.querySelector('input[name="material_code"]').value = data.material_code;-->
+<!--        row.querySelector('input[name="vendor"]').value = data.vendor;-->
+<!--        row.querySelector('input[name="uom"]').value = data.uom;-->
+<!--        row.querySelector('input[name="current_stock"]').value = data.current_stock;-->
+<!--        row.querySelector('input[name="rate"]').value = data.rate.toFixed(2);-->
+<!--        calculateTotal(row);-->
+<!--      });-->
+
+<!--      tr.querySelector('input[name="quantity"]').addEventListener('input', e => calculateTotal(tr));-->
+<!--      tr.querySelector('input[name="rate"]').addEventListener('input', e => calculateTotal(tr));-->
+
+<!--      tr.querySelector('.remove-product').addEventListener('click', function() {-->
+<!--        select.select2('destroy');-->
+<!--        container.removeChild(tr);-->
+<!--      });-->
+<!--    }-->
+
+<!--    document.getElementById('add-product-btn').addEventListener('click', addProductRow);-->
+
+<!--    window.addEventListener('DOMContentLoaded', () => {-->
+<!--      addProductRow();-->
+<!--    });-->
+
+<!--    document.getElementById('newOrderBtn').addEventListener('click', () => {-->
+<!--      document.getElementById('poFormContainer').style.display = 'flex';-->
+<!--      document.getElementById('purchaseOrdersTable').style.display = 'none';-->
+<!--      document.getElementById('newOrderBtn').style.display = 'none';-->
+<!--      document.getElementById('tableSearchInput').style.display = 'none';-->
+<!--      document.getElementById('detailsPanel').style.display = 'none';-->
+<!--    });-->
+
+<!--    document.getElementById('cancelBtn').addEventListener('click', () => {-->
+<!--      document.getElementById('poFormContainer').style.display = 'none';-->
+<!--      document.getElementById('purchaseOrdersTable').style.display = 'table';-->
+<!--      document.getElementById('newOrderBtn').style.display = 'inline-block';-->
+<!--      document.getElementById('tableSearchInput').style.display = 'block';-->
+<!--    });-->
+
+<!--    // Filter purchase orders table rows based on search input-->
+<!--    document.getElementById('tableSearchInput').addEventListener('keyup', function() {-->
+<!--      const filter = this.value.toUpperCase();-->
+<!--      const table = document.getElementById('purchaseOrdersTable');-->
+<!--      const tr = table.getElementsByTagName('tr');-->
+<!--      for (let i = 1; i < tr.length; i++) { // skip header row-->
+<!--        const tds = tr[i].getElementsByTagName('td');-->
+<!--        let match = false;-->
+<!--        for (let j = 0; j < tds.length; j++) {-->
+<!--          if (tds[j].textContent.toUpperCase().indexOf(filter) > -1) {-->
+<!--            match = true;-->
+<!--            break;-->
+<!--          }-->
+<!--        }-->
+<!--        tr[i].style.display = match ? "" : "none";-->
+<!--      }-->
+<!--    });-->
+
+<!--    async function fetchPurchaseOrders() {-->
+<!--      const res = await fetch('/api/purchase_orders');-->
+<!--      if(!res.ok) {-->
+<!--        alert('Failed to load purchase orders.');-->
+<!--        return [];-->
+<!--      }-->
+<!--      return await res.json();-->
+<!--    }-->
+
+<!--    function renderPOList(pos) {-->
+<!--      const tbody = document.getElementById('poListBody');-->
+<!--      tbody.innerHTML = '';-->
+<!--      pos.forEach(po => {-->
+<!--        const tr = document.createElement('tr');-->
+<!--        tr.tabIndex = 0;-->
+<!--        tr.setAttribute('role', 'button');-->
+<!--        tr.setAttribute('aria-label', `View details of PO ${po.purchase_order_number}`);-->
+<!--        tr.innerHTML = `-->
+<!--          <td>${po.purchase_order_number}</td>-->
+<!--          <td>${po.grn_number}</td>-->
+<!--          <td>${po.invoice_number}</td>-->
+<!--          <td>${po.date}</td>-->
+<!--        `;-->
+<!--        tr.onclick = () => showPODetails(po);-->
+<!--        tr.onkeypress = e => { if (e.key==='Enter' || e.key===' ') showPODetails(po); };-->
+<!--        tbody.appendChild(tr);-->
+<!--      });-->
+<!--    }-->
+
+<!--    function showPODetails(po) {-->
+<!--      document.getElementById('detailPONumber').textContent = po.purchase_order_number;-->
+<!--      document.getElementById('detailGRNNumber').textContent = po.grn_number;-->
+<!--      document.getElementById('detailInvoiceNumber').textContent = po.invoice_number;-->
+<!--      document.getElementById('detailDate').textContent = po.date;-->
+
+<!--      const productBody = document.getElementById('productListBody');-->
+<!--      productBody.innerHTML = '';-->
+<!--      po.items.forEach(item => {-->
+<!--        const tr = document.createElement('tr');-->
+<!--        tr.innerHTML = `-->
+<!--          <td>${item.product_name}</td>-->
+<!--          <td>${item.quantity}</td>-->
+<!--          <td>${item.rate !== undefined ? item.rate.toFixed(2) : 'N/A'}</td>-->
+<!--          <td>${item.total !== undefined ? item.total.toFixed(2) : 'N/A'}</td>-->
+<!--        `;-->
+<!--        productBody.appendChild(tr);-->
+<!--      });-->
+
+<!--      document.getElementById('detailsPanel').style.display = 'flex';-->
+<!--      document.getElementById('purchaseOrdersTable').style.display = 'none';-->
+<!--      document.getElementById('newOrderBtn').style.display = 'none';-->
+<!--      document.getElementById('tableSearchInput').style.display = 'none';-->
+
+<!--      document.getElementById('poFormContainer').style.display = 'none';-->
+<!--    }-->
+
+<!--    document.getElementById('closeBtn').addEventListener('click', () => {-->
+<!--      document.getElementById('detailsPanel').style.display = 'none';-->
+<!--      document.getElementById('purchaseOrdersTable').style.display = 'table';-->
+<!--      document.getElementById('newOrderBtn').style.display = 'inline-block';-->
+<!--      document.getElementById('tableSearchInput').style.display = 'inline-block';-->
+<!--    });-->
+
+<!--    document.getElementById('printBtn').addEventListener('click', () => {-->
+<!--      const buttons = document.querySelectorAll('.no-print');-->
+<!--      buttons.forEach(btn => btn.style.display = 'none');-->
+
+<!--      const element = document.getElementById('detailsPanel');-->
+<!--      html2pdf().set({-->
+<!--        margin: 10,-->
+<!--        filename: 'purchase_order_details.pdf',-->
+<!--        image: { type: 'jpeg', quality: 0.98 },-->
+<!--        html2canvas: { scale: 2 },-->
+<!--        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }-->
+<!--      }).from(element).save()-->
+<!--      .finally(() => {-->
+<!--        // Restore buttons display after PDF is saved-->
+<!--        buttons.forEach(btn => btn.style.display = '');-->
+<!--      });-->
+<!--    });-->
+
+<!--    async function init() {-->
+<!--      const purchaseOrders = await fetchPurchaseOrders();-->
+<!--      renderPOList(purchaseOrders);-->
+<!--    }-->
+<!--    init();-->
+<!--  </script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Purchase Orders</title>
+  <title>Purchase Orders - Sanaka Lithium</title>
+
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
   <style>
-    html, body {
-      height: 100%; margin: 0;
-      background-color: #f0f2f5;
-      font-family: Arial, sans-serif;
-      overflow: hidden;
-    }
     body {
-      display: flex;
-      flex-direction: column;
-    }
-    #app-wrapper {
-      flex: 1 1 auto;
-      display: flex;
-      flex-direction: column;
-      padding: 20px 30px;
-      gap: 20px;
-      overflow: hidden;
-      max-width: 100vw;
-    }
-    header {
-      display: flex;
-      justify-content: space-between; /* changed from flex-start */
-      align-items: center;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #dee2e6;
-      background: white;
-      box-shadow: 0 2px 4px rgb(0 0 0 / 0.05);
-      gap: 20px;
-    }
-
-    .header-left {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-    header h3 {
-      margin: 0;
-      font-weight: 600;
-      font-size: 1.8rem;
+      background-color: #f8f9fa;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       color: #343a40;
+      padding: 30px 15px;
     }
-    #newOrderBtn {
-      font-weight: 600;
-      font-size: 1rem;
-      padding: 8px 20px;
-    }
-    #purchaseOrdersTable, #detailsPanel, #poFormContainer {
-      flex: 1 1 auto;
-      overflow-y: auto;
-    }
-    .container-fluid {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    table {
-      border-collapse: collapse !important;
-      width: 100%;
-      background-color: white;
-      color: #2c3e50;
+
+    .panel-box {
+      background-color: #fff;
+      max-width: 960px;
+      margin: 0 auto 60px auto;
+      padding: 40px 50px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(90, 77, 228, 0.15);
       border: 1px solid #dee2e6;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-      white-space: nowrap;
     }
-    thead tr {
-      background-color: #5a35cc;
-      color: white;
+
+    h2.section-title {
+      font-weight: 700;
+      font-size: 2rem;
+      margin-bottom: 35px;
+      color: #5a4de4;
+      border-bottom: 4px solid #5a4de4;
+      padding-bottom: 8px;
+      letter-spacing: 0.03em;
+    }
+
+    label {
       font-weight: 600;
+      color: #495057;
+    }
+
+    input.form-control, select.form-select {
+      border-radius: 6px;
+      border: 1.5px solid #ced4da;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      padding: 0.5rem 0.75rem;
       font-size: 1rem;
-      border-bottom: 2px solid #6741d9;
+      max-width: 320px;
+      display: block;
+      width: 100%;
     }
-    tbody tr {
-      transition: background-color 0.2s ease;
-      cursor: pointer;
-    }
-    tbody tr:nth-child(odd) {
-      background-color: #f8f8f8;
-    }
-    tbody tr:hover, tbody tr:focus-visible {
-      background-color: #d9d6f9;
+
+    input.form-control:focus, select.form-select:focus {
+      border-color: #5a4de4;
+      box-shadow: 0 0 6px rgba(90, 77, 228, 0.5);
       outline: none;
     }
-    td, th {
-      padding: 12px 15px !important;
-      border: 1px solid #dee2e6 !important;
-      vertical-align: middle !important;
-      font-size: 0.95rem;
+
+    .info-row {
+      display: flex;
+      gap: 2.5rem;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      align-items: flex-end;
     }
-    #detailsPanel, #poFormContainer {
-      background: white;
+    .info-row > div {
+      flex: 1 1 300px;
+      min-width: 280px;
+    }
+    .grn-date {
+      background: #e9ecef;
+      padding: 10px 18px;
+      border-radius: 20px;
+      color: #6c757d;
+      font-weight: 600;
+      font-size: 1rem;
+      text-align: center;
+      user-select: none;
+      flex-shrink: 0;
+      min-width: 170px;
+    }
+
+    .table-responsive {
+      margin-top: 25px;
       border-radius: 12px;
-      box-shadow: 0 10px 25px rgb(123 95 255 / 0.15);
-      padding: 30px;
-      display: none;
-      flex-direction: column;
-      overflow-y: auto;
-      height: 100%;
+      overflow: hidden;
+      box-shadow: 0 3px 12px rgba(90, 77, 228, 0.1);
+      border: 1px solid #dee2e6;
     }
-    #detailsPanel h3, #poFormContainer h2 {
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: #572cff;
+
+    table#products-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 700px;
     }
-    dl.row dt {
-      color: #6e6e7a;
-      font-weight: 600;
-    }
-    dl.row dd {
-      color: #222;
-      margin-bottom: 0.75rem;
-    }
-    #productListBody td {
-      font-size: 0.95rem;
-    }
-    .add-product-btn {
-      margin-top: 15px;
-      padding: 10px 20px;
-      border: 2px solid #7b5fff;
-      color: #7b5fff;
+
+    table#products-table thead th {
+      background-color: #f1f3f5;
       font-weight: 700;
+      color: #5a4de4;
+      vertical-align: middle;
+      padding: 14px 12px;
+      border-bottom: 2px solid #5a4de4;
+      text-align: center;
+    }
+
+    table#products-table tbody tr:hover {
+      background-color: #fafafa;
+    }
+
+    table#products-table tbody td {
+      padding: 12px 10px;
+      vertical-align: middle;
+      border-bottom: 1px solid #dee2e6;
+      text-align: center;
+    }
+
+    /* Styling for inputs inside table */
+    table#products-table input.form-control {
+      max-width: 120px !important;
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      border: 1.2px solid #ced4da;
+      text-align: center;
+      transition: border-color 0.3s ease;
+    }
+    table#products-table input.form-control[readonly] {
+      background-color: #e9ecef;
+      cursor: default;
+      color: #495057;
+    }
+
+    /* Select2 custom width and style */
+    select.select2-select-material {
+      max-width: 200px !important;
+      margin-bottom: 6px;
+      text-align-last: center;
+    }
+
+    .add-product-btn {
+      margin-top: 16px;
+      padding: 10px 30px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: white;
+      background-color: #5a4de4;
       border-radius: 8px;
       cursor: pointer;
       user-select: none;
-      font-size: 1rem;
-      background-color: transparent;
-      display: inline-block;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      width: fit-content;
+      border: none;
+      box-shadow: 0 3px 12px rgba(90, 77, 228, 0.4);
+      transition: background-color 0.25s ease, box-shadow 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
-    .add-product-btn:hover, .add-product-btn:focus {
-      background-color: #7b5fff;
-      color: white;
+    .add-product-btn:hover,
+    .add-product-btn:focus {
+      background-color: #4038b0;
+      box-shadow: 0 5px 15px rgba(64, 56, 176, 0.7);
+      color: #fff;
       outline: none;
     }
+    .add-product-btn:active {
+      background-color: #332e92;
+      box-shadow: 0 2px 8px rgba(51, 46, 146, 0.9);
+    }
+
     .remove-product {
       font-size: 1.4rem;
       color: #dc3545;
-      background-color: transparent;
+      background: transparent;
       border: none;
       cursor: pointer;
-      display: flex; justify-content: center; align-items: center;
-      padding: 0; width: 36px; height: 36px;
-      transition: color 0.3s ease;
+      padding: 2px;
+      width: 34px;
+      height: 34px;
       border-radius: 6px;
+      transition: color 0.3s ease, background-color 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .remove-product:hover, .remove-product:focus {
       color: #b02a37;
       outline: none;
+      background-color: rgba(220, 53, 69, 0.15);
     }
-    form#poForm input.form-control, form#poForm select.form-control {
-      font-size: 1rem;
-      border-radius: 8px;
-      padding: 8px 12px;
-      border: 1.5px solid #d1d3e0;
-      transition: border-color 0.3s ease;
-    }
-    form#poForm input.form-control:focus, form#poForm select.form-control:focus {
-      border-color: #7b5fff;
-      box-shadow: 0 0 3px 1px rgba(123, 95, 255, 0.4);
-      outline: none;
-    }
-    #poForm button[type=submit] {
-      max-width: 300px;
-      font-size: 1rem;
+
+    button.btn-primary {
+      width: 100%;
+      max-width: 320px;
       font-weight: 700;
-      padding: 12px;
-      border-radius: 10px;
-      background-color: #7b5fff;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      padding: 12px 0;
+      background-color: #5a4de4;
       border: none;
-      color: white;
-      transition: background-color 0.3s ease;
+      box-shadow: 0 6px 15px rgba(90, 77, 228, 0.5);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      user-select: none;
+      margin-top: 30px;
+      align-self: center;
+      display: block;
     }
-    #poForm button[type=submit]:hover, #poForm button[type=submit]:focus {
-      background-color: #5a3acc;
+    button.btn-primary:hover, button.btn-primary:focus {
+      background-color: #4038b0;
+      box-shadow: 0 8px 22px rgba(64, 56, 176, 0.75);
       outline: none;
     }
-    #cancelBtn {
-      max-width: 300px;
-      font-size: 1rem;
-      font-weight: 600;
-      padding: 12px;
-      border-radius: 10px;
+    button.btn-primary:active {
+      background-color: #332e92;
     }
-    #purchaseOrdersTable::-webkit-scrollbar,
-    #detailsPanel::-webkit-scrollbar,
-    #poFormContainer::-webkit-scrollbar {
-      width: 8px;
-    }
-    #purchaseOrdersTable::-webkit-scrollbar-thumb,
-    #detailsPanel::-webkit-scrollbar-thumb,
-    #poFormContainer::-webkit-scrollbar-thumb {
-      background-color: #7b5fff88;
-      border-radius: 10px;
-    }
-    @media (max-width: 768px) {
-      header {
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .info-row {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
+        gap: 12px;
       }
-      #newOrderBtn {
-        width: 100%;
+      .grn-date {
+        margin-left: 0;
+        min-width: auto;
+        font-size: 0.95rem;
+        padding: 8px 14px;
       }
-      #poForm .mb-1, #poForm .mb-3 {
+      input.form-control, select.form-select {
         max-width: 100% !important;
       }
-      table thead tr th, table tbody tr td {
-        font-size: 0.85rem;
-      }
-      #tableSearchInput {
-        width: 100%;
-        margin-bottom: 10px;
-      }
     }
-
-    @media print {
-  .no-print {
-    display: none !important;
-  }
-}
-
   </style>
 </head>
 <body>
-  <header>
-      <div class="header-left">
-        <button id="newOrderBtn" class="btn btn-success">New</button>
-        <h3>Purchase Orders</h3>
-      </div>
-    <input type="text" id="tableSearchInput" class="form-control mb-3" placeholder="Search Purchase Orders..." aria-label="Search Purchase Orders" style="max-width: 300px;" />
-  </header>
+  <main class="panel-box" role="main" aria-label="Purchase Order Management">
 
-  <div id="app-wrapper" class="container-fluid" role="main">
-
-
-    <!-- Responsive table wrapper -->
-    <div class="table-responsive" aria-label="Purchase Orders Table Container">
-      <table class="table table-striped table-bordered table-hover" id="purchaseOrdersTable" aria-label="Purchase Orders List">
-        <thead>
-          <tr>
-            <th>PO Number</th>
-            <th>GRN Number</th>
-            <th>Invoice Number</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody id="poListBody" aria-live="polite"></tbody>
-      </table>
+    <!-- Header with New button -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+      <h2 class="section-title">Recent Purchase Orders</h2>
+      <button id="toggleFormBtn" type="button" class="btn btn-outline-primary" aria-expanded="false" aria-controls="purchaseOrderFormContainer">
+        New
+      </button>
     </div>
 
-    <div id="detailsPanel"  tabindex="0">
-      <dl class="row">
-        <dt class="col-sm-3">PO Number:</dt><dd class="col-sm-9" id="detailPONumber"></dd>
-        <dt class="col-sm-3">GRN Number:</dt><dd class="col-sm-9" id="detailGRNNumber"></dd>
-        <dt class="col-sm-3">Invoice Number:</dt><dd class="col-sm-9" id="detailInvoiceNumber"></dd>
-        <dt class="col-sm-3">GRN Date:</dt><dd class="col-sm-9" id="detailDate"></dd>
-      </dl>
-      <h4>Products</h4>
-      <table class="table table-bordered" aria-label="Products table">
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Quantity</th>
-            <th>Rate</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody id="productListBody"></tbody>
-      </table>
-      <div class="d-flex justify-content-start gap-2 mt-3">
-        <button id="printBtn" class="btn btn-primary no-print">Print PDF</button>
-        <button id="closeBtn" class="btn btn-secondary no-print">Close</button>
-      </div>
-    </div>
+    <!-- Add Purchase Order form container, hidden initially -->
+    <section id="purchaseOrderFormContainer" style="display: none;" aria-label="Add Purchase Order Form">
+      <h2 class="section-title">Add Purchase Order</h2>
+      <form method="POST" action="{{ url_for('add_purchase_order') }}" novalidate>
+        <div class="mb-3">
+          <label for="purchase_order_number" class="form-label">Purchase Order Number</label>
+          <input type="text" id="purchase_order_number" name="purchase_order_number" class="form-control" required placeholder="Enter Purchase Order Number" />
+        </div>
 
-    <div id="poFormContainer" tabindex="0" aria-label="Add Purchase Order Form" style="display:none;">
-      <h2 class="mb-4">Add Purchase Order</h2>
-      <form id="poForm" method="POST" action="{{ url_for('purchase_order') }}">
-        <div class="mb-3">
-          <label for="purchase_order_number" class="form-label">Purchase Order Number:</label>
-          <input type="text" id="purchase_order_number" name="purchase_order_number" class="form-control" required placeholder="Enter Purchase Order Number" autocomplete="off" />
-        </div>
-        <div class="mb-1 d-flex align-items-center flex-wrap" style="gap: 1rem;">
-          <div class="mb-3" style="flex: 1 1 300px; min-width: 250px;">
-            <label for="grn_number" class="form-label">GRN Number:</label>
-            <input type="text" class="form-control" id="grn_number" name="grn_number" value="{{ generated_grn }}" readonly autocomplete="off" />
+        <div class="info-row">
+          <div>
+            <label for="grn_number" class="form-label">GRN Number</label>
+            <input type="text" id="grn_number" name="grn_number" class="form-control" value="{{ generated_grn }}" readonly />
           </div>
-          <div style="text-align: right; font-weight: 700; font-size: 1rem; background: whitesmoke; color: #444; padding: 6px 14px; border-radius: 12px; user-select: none; min-width: 200px;">
-            GRN Date: {{ today_date }}
-          </div>
+          <div class="grn-date" aria-label="Goods Receipt Note Date">GRN Date: {{ today_date }}</div>
         </div>
+
         <div class="mb-3">
-          <label for="invoice_number" class="form-label">Invoice Number:</label>
-          <input type="text" id="invoice_number" name="invoice_number" class="form-control" required placeholder="Enter Invoice Number" autocomplete="off" />
+          <label for="invoice_number" class="form-label">Invoice Number</label>
+          <input type="text" id="invoice_number" name="invoice_number" class="form-control" required placeholder="Enter Invoice Number" />
         </div>
-        <div class="mb-3">
-          <table class="table table-bordered mb-0" id="products-table" aria-label="Products table">
+
+        <div class="table-responsive">
+          <table class="table table-bordered mb-0" id="products-table" aria-label="Products Table">
             <thead class="table-light">
               <tr>
-                <th style="width: 20%;">Product</th>
-                <th style="width: 10%;">Material Code</th>
-                <th style="width: 15%;">Vendor</th>
-                <th style="width: 10%;">Uom</th>
-                <th style="width: 10%;">Current Stock</th>
-                <th style="width: 10%;">Quantity</th>
-                <th style="width: 10%;">Rate</th>
-                <th style="width: 10%;">Total</th>
-                <th style="width: 5%;"></th>
+                <th style="width: 23%;">Product</th>
+                <th style="width: 13%;">Material Code</th>
+                <th style="width: 17%;">Vendor</th>
+                <th style="width: 9%;">Uom</th>
+                <th style="width: 9%;">Current Stock</th>
+                <th style="width: 9%;">Quantity</th>
+                <th style="width: 9%;">Rate</th>
+                <th style="width: 9%;">Total</th>
+                <th style="width: 6%;"></th>
               </tr>
             </thead>
-            <tbody id="products-container" aria-live="polite" aria-relevant="additions removals"></tbody>
+            <tbody id="products-container"></tbody>
           </table>
-          <div class="add-product-btn" id="add-product-btn" tabindex="0" role="button" aria-label="Add a product">Add a product</div>
         </div>
-        <div class="d-flex flex-wrap gap-2 mt-4">
-          <button type="submit" class="btn btn-primary">Add Purchase Order</button>
-          <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
-        </div>
+        <button type="button" id="add-product-btn" class="add-product-btn" aria-label="Add a product">
+          <i class="bi bi-plus-circle"></i> Add Product
+        </button>
+
+        <button type="submit" class="btn btn-primary mt-4" aria-label="Submit Purchase Order">
+          Add Purchase Order
+        </button>
       </form>
-    </div>
+    </section>
 
-  </div>
+    <section id="recentPurchaseOrdersSection" aria-labelledby="recentOrdersTitle" class="mt-5">
+      <input
+        type="search"
+        id="poSearchInput"
+        class="form-control mb-3"
+        placeholder="Search Purchase Order or Invoice"
+        aria-label="Search Purchase Orders or Invoices"
+      />
+      <div class="table-responsive rounded shadow-sm">
+        <table id="recentPurchaseOrders" class="table mb-0" aria-describedby="recentOrdersTitle">
+          <thead>
+            <tr>
+              <th>PO Number</th>
+              <th>GRN Number</th>
+              <th>Invoice Number</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for po in purchase_orders %}
+            <tr>
+              <td><a href="{{ url_for('purchase_order_invoice', po_id=po.id) }}" class="text-decoration-none">{{ po.purchase_order_number }}</a></td>
+              <td>{{ po.grn_number }}</td>
+              <td><a href="{{ url_for('purchase_order_invoice', po_id=po.id) }}" class="text-decoration-none">{{ po.invoice_number }}</a></td>
+              <td>{{ po.date.strftime('%Y-%m-%d') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- Bootstrap, jQuery, Select2 -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
   <script>
-    document.getElementById('poFormContainer').style.display = 'none';
-    document.getElementById('detailsPanel').style.display = 'none';
+    document.addEventListener('DOMContentLoaded', () => {
+      // Toggle Add Purchase Order form visibility
+      const toggleBtn = document.getElementById('toggleFormBtn');
+      const formContainer = document.getElementById('purchaseOrderFormContainer');
 
-    const productDataMap = {
-      {% for material in materials %}
-      "{{ material.id }}": {
-        material_code: {{ material.material_code|tojson }},
-        vendor: {{ material.vendor|tojson }},
-        uom: {{ material.unit_of_measurement|tojson }},
-        current_stock: {{ material.current_stock }},
-        rate: {{ material.rate if material.rate is defined else 0 }}
-      }{% if not loop.last %},{% endif %}
-      {% endfor %}
-    };
-
-    const container = document.getElementById('products-container');
-
-    function calculateTotal(row) {
-      const qtyInput = row.querySelector('input[name="quantity"]');
-      const rateInput = row.querySelector('input[name="rate"]');
-      const totalInput = row.querySelector('input[name="total"]');
-
-      const qty = parseFloat(qtyInput.value) || 0;
-      const rate = parseFloat(rateInput.value) || 0;
-
-      totalInput.value = (qty * rate).toFixed(2);
-    }
-
-    function addProductRow() {
-      const tr = document.createElement('tr');
-      tr.classList.add('product-row', 'align-middle');
-
-      let optionsHTML = '<option></option>';
-      {% for material in materials %}
-      optionsHTML += `<option value="{{ material.id }}">{{ material.material_name }}</option>`;
-      {% endfor %}
-
-      tr.innerHTML = `
-        <td>
-          <select class="select2-select-material" name="material_id" style="width: 100%;" required>
-            ${optionsHTML}
-          </select>
-        </td>
-        <td><input type="text" name="material_code" class="form-control" readonly /></td>
-        <td><input type="text" name="vendor" class="form-control" readonly /></td>
-        <td><input type="text" name="uom" class="form-control" readonly /></td>
-        <td><input type="number" name="current_stock" class="form-control" readonly /></td>
-        <td><input type="number" name="quantity" class="form-control" min="1" required value="0" /></td>
-        <td><input type="number" name="rate" class="form-control" min="0" step="0.01" required value="0" /></td>
-        <td><input type="text" name="total" class="form-control" readonly value="0.00" /></td>
-        <td class="text-center">
-          <button type="button" class="remove-product" title="Remove product" aria-label="Remove product">
-            <i class="bi bi-trash-fill"></i>
-          </button>
-        </td>
-      `;
-
-      container.appendChild(tr);
-
-      const select = $(tr).find('.select2-select-material');
-      select.select2({
-        placeholder: 'Search product',
-        allowClear: true,
-        width: 'resolve'
-      });
-
-      select.on('change', function() {
-        const val = this.value;
-        const data = productDataMap[val] || {material_code: '', vendor: '', uom: '', current_stock: '', rate: 0};
-        const row = this.closest('tr');
-        row.querySelector('input[name="material_code"]').value = data.material_code;
-        row.querySelector('input[name="vendor"]').value = data.vendor;
-        row.querySelector('input[name="uom"]').value = data.uom;
-        row.querySelector('input[name="current_stock"]').value = data.current_stock;
-        row.querySelector('input[name="rate"]').value = data.rate.toFixed(2);
-        calculateTotal(row);
-      });
-
-      tr.querySelector('input[name="quantity"]').addEventListener('input', e => calculateTotal(tr));
-      tr.querySelector('input[name="rate"]').addEventListener('input', e => calculateTotal(tr));
-
-      tr.querySelector('.remove-product').addEventListener('click', function() {
-        select.select2('destroy');
-        container.removeChild(tr);
-      });
-    }
-
-    document.getElementById('add-product-btn').addEventListener('click', addProductRow);
-
-    window.addEventListener('DOMContentLoaded', () => {
-      addProductRow();
-    });
-
-    document.getElementById('newOrderBtn').addEventListener('click', () => {
-      document.getElementById('poFormContainer').style.display = 'flex';
-      document.getElementById('purchaseOrdersTable').style.display = 'none';
-      document.getElementById('newOrderBtn').style.display = 'none';
-      document.getElementById('tableSearchInput').style.display = 'none';
-      document.getElementById('detailsPanel').style.display = 'none';
-    });
-
-    document.getElementById('cancelBtn').addEventListener('click', () => {
-      document.getElementById('poFormContainer').style.display = 'none';
-      document.getElementById('purchaseOrdersTable').style.display = 'table';
-      document.getElementById('newOrderBtn').style.display = 'inline-block';
-      document.getElementById('tableSearchInput').style.display = 'block';
-    });
-
-    // Filter purchase orders table rows based on search input
-    document.getElementById('tableSearchInput').addEventListener('keyup', function() {
-      const filter = this.value.toUpperCase();
-      const table = document.getElementById('purchaseOrdersTable');
-      const tr = table.getElementsByTagName('tr');
-      for (let i = 1; i < tr.length; i++) { // skip header row
-        const tds = tr[i].getElementsByTagName('td');
-        let match = false;
-        for (let j = 0; j < tds.length; j++) {
-          if (tds[j].textContent.toUpperCase().indexOf(filter) > -1) {
-            match = true;
-            break;
-          }
+      toggleBtn.addEventListener('click', () => {
+        const isVisible = formContainer.style.display === 'block';
+        if (isVisible) {
+          formContainer.style.display = 'none';
+          toggleBtn.setAttribute('aria-expanded', 'false');
+          toggleBtn.textContent = 'New';
+        } else {
+          formContainer.style.display = 'block';
+          toggleBtn.setAttribute('aria-expanded', 'true');
+          toggleBtn.textContent = 'Hide form';
         }
-        tr[i].style.display = match ? "" : "none";
+      });
+
+      // Product data map populated by server-rendered data
+      const productDataMap = {
+        {% for material in materials %}
+        "{{ material.id }}": {
+          material_code: {{ material.material_code|tojson }},
+          vendor: {{ material.vendor|tojson }},
+          uom: {{ material.unit_of_measurement|tojson }},
+          current_stock: {{ material.current_stock| tojson }},
+          rate: {{ (material.rate if material.rate is defined else 0) | tojson }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      };
+
+      const container = document.getElementById('products-container');
+
+      function calculateTotal(row) {
+        const qtyInput = row.querySelector('input[name="quantity"]');
+        const rateInput = row.querySelector('input[name="rate"]');
+        const totalInput = row.querySelector('input[name="total"]');
+
+        const qty = parseFloat(qtyInput.value) || 0;
+        const rate = parseFloat(rateInput.value) || 0;
+
+        totalInput.value = (qty * rate).toFixed(2);
       }
-    });
 
-    async function fetchPurchaseOrders() {
-      const res = await fetch('/api/purchase_orders');
-      if(!res.ok) {
-        alert('Failed to load purchase orders.');
-        return [];
+      function addProductRow() {
+        const tr = document.createElement('tr');
+        tr.classList.add('product-row', 'align-middle');
+
+        let optionsHTML = '<option></option>';
+        {% for material in materials %}
+        optionsHTML += '<option value="{{ material.id }}">{{ material.material_name }}</option>';
+        {% endfor %}
+
+        tr.innerHTML = `
+          <td>
+            <select class="select2-select-material" name="material_id" style="width: 100%;" required>
+              ${optionsHTML}
+            </select>
+          </td>
+          <td><input type="text" name="material_code" class="form-control" readonly /></td>
+          <td><input type="text" name="vendor" class="form-control" readonly /></td>
+          <td><input type="text" name="uom" class="form-control" readonly /></td>
+          <td><input type="number" name="current_stock" class="form-control" readonly /></td>
+          <td><input type="number" name="quantity" class="form-control" min="1" required value="0" /></td>
+          <td><input type="number" name="rate" class="form-control" min="0" step="0.01" required value="0" /></td>
+          <td><input type="text" name="total" class="form-control" readonly value="0.00" /></td>
+          <td class="text-center">
+            <button type="button" class="remove-product" title="Remove product" aria-label="Remove product">
+              <i class="bi bi-trash-fill"></i>
+            </button>
+          </td>
+        `;
+
+        container.appendChild(tr);
+
+        const select = $(tr).find('.select2-select-material');
+        select.select2({
+          placeholder: 'Search product',
+          allowClear: true,
+          width: 'resolve'
+        });
+
+        select.on('change', function() {
+          const val = this.value;
+          const data = productDataMap[val] || {material_code: '', vendor: '', uom: '', current_stock: '', rate: 0};
+          const row = this.closest('tr');
+          row.querySelector('input[name="material_code"]').value = data.material_code;
+          row.querySelector('input[name="vendor"]').value = data.vendor;
+          row.querySelector('input[name="uom"]').value = data.uom;
+          row.querySelector('input[name="current_stock"]').value = data.current_stock;
+          row.querySelector('input[name="rate"]').value = data.rate.toFixed(2);
+          calculateTotal(row);
+        });
+
+        tr.querySelector('input[name="quantity"]').addEventListener('input', () => calculateTotal(tr));
+        tr.querySelector('input[name="rate"]').addEventListener('input', () => calculateTotal(tr));
+
+        tr.querySelector('.remove-product').addEventListener('click', () => {
+          select.select2('destroy');
+          container.removeChild(tr);
+        });
       }
-      return await res.json();
-    }
 
-    function renderPOList(pos) {
-      const tbody = document.getElementById('poListBody');
-      tbody.innerHTML = '';
-      pos.forEach(po => {
-        const tr = document.createElement('tr');
-        tr.tabIndex = 0;
-        tr.setAttribute('role', 'button');
-        tr.setAttribute('aria-label', `View details of PO ${po.purchase_order_number}`);
-        tr.innerHTML = `
-          <td>${po.purchase_order_number}</td>
-          <td>${po.grn_number}</td>
-          <td>${po.invoice_number}</td>
-          <td>${po.date}</td>
-        `;
-        tr.onclick = () => showPODetails(po);
-        tr.onkeypress = e => { if (e.key==='Enter' || e.key===' ') showPODetails(po); };
-        tbody.appendChild(tr);
-      });
-    }
+      // Initial product input row when form is shown
+      addProductRow();
 
-    function showPODetails(po) {
-      document.getElementById('detailPONumber').textContent = po.purchase_order_number;
-      document.getElementById('detailGRNNumber').textContent = po.grn_number;
-      document.getElementById('detailInvoiceNumber').textContent = po.invoice_number;
-      document.getElementById('detailDate').textContent = po.date;
-
-      const productBody = document.getElementById('productListBody');
-      productBody.innerHTML = '';
-      po.items.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${item.product_name}</td>
-          <td>${item.quantity}</td>
-          <td>${item.rate !== undefined ? item.rate.toFixed(2) : 'N/A'}</td>
-          <td>${item.total !== undefined ? item.total.toFixed(2) : 'N/A'}</td>
-        `;
-        productBody.appendChild(tr);
+      // Add new product rows on button click
+      document.getElementById('add-product-btn').addEventListener('click', () => {
+        addProductRow();
       });
 
-      document.getElementById('detailsPanel').style.display = 'flex';
-      document.getElementById('purchaseOrdersTable').style.display = 'none';
-      document.getElementById('newOrderBtn').style.display = 'none';
-      document.getElementById('tableSearchInput').style.display = 'none';
+      // Search recent purchase orders functionality
+      document.getElementById('poSearchInput').addEventListener('input', function () {
+        const query = this.value.trim();
+        const tbody = document.querySelector('#recentPurchaseOrders tbody');
 
-      document.getElementById('poFormContainer').style.display = 'none';
-    }
+        if (query.length === 0) {
+          // Optionally reload initial data or clear search results
+          return;
+        }
 
-    document.getElementById('closeBtn').addEventListener('click', () => {
-      document.getElementById('detailsPanel').style.display = 'none';
-      document.getElementById('purchaseOrdersTable').style.display = 'table';
-      document.getElementById('newOrderBtn').style.display = 'inline-block';
-      document.getElementById('tableSearchInput').style.display = 'inline-block';
-    });
-
-    document.getElementById('printBtn').addEventListener('click', () => {
-      const buttons = document.querySelectorAll('.no-print');
-      buttons.forEach(btn => btn.style.display = 'none');
-
-      const element = document.getElementById('detailsPanel');
-      html2pdf().set({
-        margin: 10,
-        filename: 'purchase_order_details.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      }).from(element).save()
-      .finally(() => {
-        // Restore buttons display after PDF is saved
-        buttons.forEach(btn => btn.style.display = '');
+        fetch(/api/search_purchase_orders?q=${encodeURIComponent(query)})
+          .then(response => response.json())
+          .then(data => {
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+              const row = document.createElement('tr');
+              row.innerHTML = '<td colspan="4" class="text-center">No matching purchase orders found.</td>';
+              tbody.appendChild(row);
+              return;
+            }
+            data.forEach(po => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td><a href="/purchase_order_invoice/${po.id}" class="text-decoration-none">${po.purchase_order_number}</a></td>
+                <td>${po.grn_number}</td>
+                <td><a href="/purchase_order_invoice/${po.id}" class="text-decoration-none">${po.invoice_number}</a></td>
+                <td>${po.date}</td>
+              `;
+              tbody.appendChild(row);
+            });
+          })
+          .catch(error => {
+            console.error('Error fetching purchase orders:', error);
+          });
       });
     });
-
-    async function init() {
-      const purchaseOrders = await fetchPurchaseOrders();
-      renderPOList(purchaseOrders);
-    }
-    init();
   </script>
 </body>
 </html>
